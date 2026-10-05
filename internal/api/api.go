@@ -9,6 +9,7 @@ import (
 
 	"indotunnel/internal/auth"
 	"indotunnel/internal/config"
+	"indotunnel/internal/events"
 	"indotunnel/internal/store"
 	"indotunnel/internal/tunnel"
 )
@@ -46,6 +47,7 @@ type SessionStore interface {
 	SessionByTokenHash(ctx context.Context, tokenHash string) (store.Session, error)
 	RevokeSession(ctx context.Context, tokenHash string) error
 	PlanByCode(ctx context.Context, code string) (store.Plan, error)
+	UserByID(ctx context.Context, id uuid.UUID) (store.User, error)
 }
 
 // RateLimiter counts attempts against a key for a window.
@@ -68,33 +70,53 @@ type Deps struct {
 	Ready        []Pinger
 	SessionStore SessionStore
 	RateLimiter  RateLimiter
+	Bus          events.Bus
 }
 
 // Server hosts the control-plane HTTP routes.
 type Server struct {
-	deps Deps
-	mux  *http.ServeMux
+	deps       Deps
+	mux        *http.ServeMux
+	sessionMux *http.ServeMux
 }
 
 // New builds the control API server and its routes.
 func New(deps Deps) *Server {
-	s := &Server{deps: deps, mux: http.NewServeMux()}
+	s := &Server{deps: deps, mux: http.NewServeMux(), sessionMux: http.NewServeMux()}
 	s.routes()
+	s.sessionRoutes()
 	return s
 }
 
-// Handler returns the fully-wired HTTP handler. /healthz and /readyz are
-// public; every other route requires a bearer API key.
+// Handler returns the fully-wired HTTP handler. /healthz, /readyz, signup and
+// login are public; session routes require a cookie; every other route
+// requires a bearer API key.
 func (s *Server) Handler() http.Handler {
 	authed := auth.BearerMiddleware(s.deps.Store)(s.mux)
+	session := s.sessionHandler()
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case "/healthz", "/readyz", "/v1/auth/signup", "/v1/auth/login":
 			s.mux.ServeHTTP(w, r)
 			return
+		case "/v1/auth/logout", "/v1/auth/me", "/v1/events":
+			session.ServeHTTP(w, r)
+			return
 		}
 		authed.ServeHTTP(w, r)
 	})
+}
+
+// sessionHandler wraps the cookie-authenticated routes with SessionMiddleware.
+func (s *Server) sessionHandler() http.Handler {
+	return auth.SessionMiddleware(s.deps.SessionStore, auth.CookieName)(s.sessionMux)
+}
+
+// sessionRoutes registers cookie-authenticated endpoints.
+func (s *Server) sessionRoutes() {
+	s.sessionMux.HandleFunc("POST /v1/auth/logout", s.handleLogout)
+	s.sessionMux.HandleFunc("GET /v1/auth/me", s.handleMe)
+	s.sessionMux.HandleFunc("GET /v1/events", s.handleEvents)
 }
 
 // routes registers every control-plane endpoint on the internal mux.
@@ -110,6 +132,4 @@ func (s *Server) routes() {
 	s.mux.HandleFunc("GET /v1/usage/month", s.handleUsageMonth)
 	s.mux.HandleFunc("POST /v1/auth/signup", s.handleSignup)
 	s.mux.HandleFunc("POST /v1/auth/login", s.handleLogin)
-	s.mux.HandleFunc("POST /v1/auth/logout", s.handleLogout)
-	s.mux.HandleFunc("GET /v1/auth/me", s.handleMe)
 }

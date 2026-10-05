@@ -74,6 +74,15 @@ func (f *fakeSessionStore) PlanByCode(ctx context.Context, code string) (store.P
 	return f.plan, nil
 }
 
+func (f *fakeSessionStore) UserByID(ctx context.Context, id uuid.UUID) (store.User, error) {
+	for _, u := range f.users {
+		if u.ID == id {
+			return u, nil
+		}
+	}
+	return store.User{}, store.ErrNotFound
+}
+
 type fakeRateLimiter struct{ allow bool }
 
 func (f fakeRateLimiter) Allow(ctx context.Context, key string, limit int, window time.Duration) (bool, error) {
@@ -191,15 +200,15 @@ func TestLogoutRevokesSession(t *testing.T) {
 	ss := newFakeSessionStore()
 	raw, hash := auth.NewSessionToken()
 	u := store.User{ID: uuid.New(), Email: "a@b.c"}
+	ss.users[u.Email] = u
 	ss.sessions[hash] = store.Session{UserID: u.ID, TokenHash: hash, ExpiresAt: time.Now().Add(time.Hour)}
 	srv := newAuthAPI(ss, fakeRateLimiter{allow: true})
 
 	req := httptest.NewRequest("POST", "/v1/auth/logout", nil)
 	req.Header.Set("Origin", "http://localhost:3000")
 	req.AddCookie(&http.Cookie{Name: auth.CookieName, Value: raw})
-	req = req.WithContext(auth.WithUser(req.Context(), u))
 	rec := httptest.NewRecorder()
-	srv.mux.ServeHTTP(rec, req)
+	srv.Handler().ServeHTTP(rec, req)
 	if rec.Code != 204 {
 		t.Fatalf("code=%d body=%s", rec.Code, rec.Body.String())
 	}
