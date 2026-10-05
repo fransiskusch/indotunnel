@@ -3,6 +3,7 @@ package api
 import (
 	"context"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -91,25 +92,38 @@ func New(deps Deps) *Server {
 }
 
 // Handler returns the fully-wired HTTP handler. /healthz, /readyz, signup and
-// login are public; session routes require a cookie; every other route
-// requires a bearer API key.
+// login are public; requests carrying a session cookie are routed to the
+// cookie-authenticated mux; everything else requires a bearer API key.
 func (s *Server) Handler() http.Handler {
 	authed := auth.BearerMiddleware(s.deps.Store)(s.mux)
 	session := s.sessionHandler()
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		switch {
-		case r.URL.Path == "/healthz", r.URL.Path == "/readyz",
-			r.URL.Path == "/v1/auth/signup", r.URL.Path == "/v1/auth/login":
+		switch r.URL.Path {
+		case "/healthz", "/readyz", "/v1/auth/signup", "/v1/auth/login":
 			s.mux.ServeHTTP(w, r)
 			return
-		case r.URL.Path == "/v1/auth/logout", r.URL.Path == "/v1/auth/me",
-			r.URL.Path == "/v1/events", r.URL.Path == "/v1/usage/history",
-			r.URL.Path == "/v1/tunnels" && r.Method == http.MethodGet:
+		}
+		if _, err := r.Cookie(auth.CookieName); err == nil && isSessionPath(r) {
 			session.ServeHTTP(w, r)
 			return
 		}
 		authed.ServeHTTP(w, r)
 	})
+}
+
+// isSessionPath reports whether the request is served by the cookie mux.
+func isSessionPath(r *http.Request) bool {
+	p := r.URL.Path
+	switch {
+	case p == "/v1/auth/logout", p == "/v1/auth/me", p == "/v1/events",
+		p == "/v1/usage/today", p == "/v1/usage/month", p == "/v1/usage/history":
+		return true
+	case p == "/v1/tunnels":
+		return r.Method == http.MethodGet
+	case strings.HasPrefix(p, "/v1/tunnels/"):
+		return true
+	}
+	return false
 }
 
 // sessionHandler wraps the cookie-authenticated routes with SessionMiddleware.
@@ -123,6 +137,12 @@ func (s *Server) sessionRoutes() {
 	s.sessionMux.HandleFunc("GET /v1/auth/me", s.handleMe)
 	s.sessionMux.HandleFunc("GET /v1/events", s.handleEvents)
 	s.sessionMux.HandleFunc("GET /v1/tunnels", s.handleListTunnels)
+	s.sessionMux.HandleFunc("GET /v1/tunnels/{tunnel_id}", s.handleGetTunnel)
+	s.sessionMux.HandleFunc("POST /v1/tunnels/{tunnel_id}/stop", s.handleStopTunnel)
+	s.sessionMux.HandleFunc("GET /v1/tunnels/{tunnel_id}/requests", s.handleListRequests)
+	s.sessionMux.HandleFunc("GET /v1/tunnels/{tunnel_id}/requests/{request_id}", s.handleGetRequest)
+	s.sessionMux.HandleFunc("GET /v1/usage/today", s.handleUsageToday)
+	s.sessionMux.HandleFunc("GET /v1/usage/month", s.handleUsageMonth)
 	s.sessionMux.HandleFunc("GET /v1/usage/history", s.handleUsageHistory)
 }
 
