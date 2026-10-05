@@ -37,7 +37,36 @@ try {
     $hostName = ($url -replace 'https?://', '' -replace ':.*$', '')
     Write-Host "public: $url"
     $body = curl.exe -s --resolve "${hostName}:8080:127.0.0.1" "$url/"
-    if ($body -match "local-ok") { Write-Host "E2E OK" } else { Write-Host "E2E FAILED: $body"; exit 1 }
+    if (-not ($body -match "local-ok")) { Write-Host "E2E FAILED: $body"; exit 1 }
+
+    # Dashboard auth path: give the seeded user a password, log in, then list
+    # tunnels with the session cookie (the agent's tunnel belongs to the seed user).
+    $env:DATABASE_URL = "postgres://indotunnel:indotunnel@localhost:55432/indotunnel?sslmode=disable"
+    $env:EMAIL = "dev@indotunnel.id"
+    $env:PASSWORD = "e2e-password-123"
+    go run ./cmd/setpassword | Out-Null
+
+    $bodyFile = Join-Path $env:TEMP "e2e-login.json"
+    [System.IO.File]::WriteAllText($bodyFile, (@{ email = $env:EMAIL; password = $env:PASSWORD } | ConvertTo-Json -Compress))
+    $login = (curl.exe -s -i -X POST "$api/v1/auth/login" `
+        -H "Origin: http://localhost:3000" `
+        -H "Content-Type: application/json" `
+        --data-binary "@$bodyFile") -join "`n"
+    if ($login -notmatch "HTTP/1.1 200") { Write-Host "E2E FAILED: login"; Write-Host $login; exit 1 }
+    $cookie = ($login -split "`n" | Select-String -Pattern "Set-Cookie: (indotunnel_session=[^;]+)" |
+        Select-Object -First 1).Matches.Groups[1].Value
+    if (-not $cookie) { Write-Host "E2E FAILED: no session cookie"; exit 1 }
+
+    $tunnels = curl.exe -s "$api/v1/tunnels" -H "Cookie: $cookie"
+    if ($tunnels -notmatch [regex]::Escape($hostName)) {
+        Write-Host "E2E FAILED: tunnel not in dashboard list"; Write-Host $tunnels; exit 1
+    }
+
+    # Dashboard HTML reachable and renders the shell.
+    $dash = curl.exe -s "http://localhost:3000/login"
+    if ($dash -notmatch "IndoTunnel") { Write-Host "E2E FAILED: dashboard not reachable"; exit 1 }
+
+    Write-Host "E2E OK"
 }
 finally {
     Stop-Process -Id $agent.Id -Force -ErrorAction SilentlyContinue

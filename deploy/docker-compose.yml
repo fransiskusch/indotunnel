@@ -38,6 +38,8 @@ services:
       PUBLIC_HOST_SUFFIX: indotunnel.localhost
       PUBLIC_SCHEME: http
       CLIENT_IP_HASH_SALT: local-dev-salt
+      DASHBOARD_ORIGIN: http://localhost:3000
+      API_BASE_URL: http://server:8081
     ports:
       - "8080:8080"
       - "8081:8081"
@@ -47,6 +49,17 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+
+  dashboard:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile.dashboard
+    environment:
+      API_BASE_URL: http://server:8081
+    ports:
+      - "3000:3000"
+    depends_on:
+      - server
 
 volumes:
   pgdata:
