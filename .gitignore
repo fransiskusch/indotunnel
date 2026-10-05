@@ -1,0 +1,9 @@
+# scratch / plan workspace
+.superpowers/
+
+# build
+/bin/
+*.exe
+
+# local
+.env
