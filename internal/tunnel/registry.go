@@ -117,6 +117,18 @@ type Session struct {
 	yamux             *yamux.Session
 }
 
+// NewSession builds a Session around an established yamux session.
+func NewSession(connID string, userID, tunnelID uuid.UUID, subdomain string, limit int64, s *yamux.Session) *Session {
+	return &Session{
+		ConnID:            connID,
+		UserID:            userID,
+		TunnelID:          tunnelID,
+		Subdomain:         subdomain,
+		DailyRequestLimit: limit,
+		yamux:             s,
+	}
+}
+
 // Yamux returns the underlying multiplexed session.
 func (s *Session) Yamux() *yamux.Session { return s.yamux }
 
@@ -124,7 +136,7 @@ func (s *Session) Yamux() *yamux.Session { return s.yamux }
 // exists so integration-style tests in other packages can construct a session
 // without going through the network handshake.
 func NewSessionForTest(connID string, userID, tunnelID uuid.UUID, subdomain string, s *yamux.Session) *Session {
-	return &Session{ConnID: connID, UserID: userID, TunnelID: tunnelID, Subdomain: subdomain, yamux: s}
+	return NewSession(connID, userID, tunnelID, subdomain, 5000, s)
 }
 
 // Registry maps subdomains to their active sessions.

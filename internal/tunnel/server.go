@@ -8,14 +8,18 @@ import (
 	"net"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/hashicorp/yamux"
 )
 
 // SessionMeta is what authFunc resolves from a handshake.
 type SessionMeta struct {
-	UserID    string
-	TunnelID  string
-	Subdomain string
+	UserID            string
+	UserUUID          uuid.UUID
+	TunnelID          string
+	TunnelUUID        uuid.UUID
+	Subdomain         string
+	DailyRequestLimit int64
 }
 
 // AuthFunc validates a handshake and returns the session metadata, or an error
