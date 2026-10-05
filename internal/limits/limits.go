@@ -85,3 +85,16 @@ func (c *Checker) MonthBandwidth(ctx context.Context, userID string) (int64, err
 	}
 	return n, err
 }
+
+// Allow counts an attempt against key and reports whether it is within limit
+// for the given window. The counter expires on first increment.
+func (c *Checker) Allow(ctx context.Context, key string, limit int, window time.Duration) (bool, error) {
+	n, err := c.rdb.Incr(ctx, key).Result()
+	if err != nil {
+		return false, fmt.Errorf("limits: rate incr: %w", err)
+	}
+	if n == 1 {
+		c.rdb.Expire(ctx, key, window)
+	}
+	return n <= int64(limit), nil
+}

@@ -75,12 +75,14 @@ func run(log *slog.Logger) error {
 	registry := tunnel.NewRegistry()
 
 	apiSrv := api.New(api.Deps{
-		Store:    st,
-		Limits:   checker,
-		Lock:     locker,
-		Registry: registry,
-		Cfg:      cfg,
-		Ready:    []api.Pinger{redisPinger{rdb}},
+		Store:        st,
+		Limits:       checker,
+		Lock:         locker,
+		Registry:     registry,
+		Cfg:          cfg,
+		Ready:        []api.Pinger{redisPinger{rdb}},
+		SessionStore: st,
+		RateLimiter:  checker,
 	})
 
 	gw := gateway.New(cfg, registry, checker, logger)

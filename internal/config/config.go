@@ -17,8 +17,12 @@ type Config struct {
 	PublicScheme            string
 	APIBaseURL              string
 	ClientIPHashSalt        string
+	DashboardOrigin         string
 	MaxStreamsPerTunnel     int
 	RequestLogRetentionDays int
+	SessionTTLHours         int
+	BcryptCost              int
+	LoginRateLimit          int
 }
 
 func env(key, def string) string {
@@ -50,6 +54,18 @@ func Load() (Config, error) {
 	if err != nil {
 		return Config{}, err
 	}
+	sessionTTL, err := envInt("SESSION_TTL_HOURS", 720)
+	if err != nil {
+		return Config{}, err
+	}
+	bcryptCost, err := envInt("BCRYPT_COST", 12)
+	if err != nil {
+		return Config{}, err
+	}
+	loginRate, err := envInt("LOGIN_RATE_LIMIT", 10)
+	if err != nil {
+		return Config{}, err
+	}
 	return Config{
 		DatabaseURL:             env("DATABASE_URL", "postgres://indotunnel:indotunnel@localhost:55432/indotunnel?sslmode=disable"),
 		RedisURL:                env("REDIS_URL", "redis://localhost:6379/0"),
@@ -60,7 +76,11 @@ func Load() (Config, error) {
 		PublicScheme:            env("PUBLIC_SCHEME", "http"),
 		APIBaseURL:              env("API_BASE_URL", "http://localhost:8081"),
 		ClientIPHashSalt:        env("CLIENT_IP_HASH_SALT", "change-me"),
+		DashboardOrigin:         env("DASHBOARD_ORIGIN", "http://localhost:3000"),
 		MaxStreamsPerTunnel:     maxStreams,
 		RequestLogRetentionDays: retention,
+		SessionTTLHours:         sessionTTL,
+		BcryptCost:              bcryptCost,
+		LoginRateLimit:          loginRate,
 	}, nil
 }

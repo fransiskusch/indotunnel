@@ -38,6 +38,21 @@ type Locker interface {
 	Lock(ctx context.Context, key string, ttl time.Duration) (func(), bool, error)
 }
 
+// SessionStore is the persistence surface for dashboard auth.
+type SessionStore interface {
+	CreateUserWithPassword(ctx context.Context, email, name, passwordHash string, planID uuid.UUID) (store.User, error)
+	UserByEmail(ctx context.Context, email string) (store.User, error)
+	CreateUserSession(ctx context.Context, s store.Session) error
+	SessionByTokenHash(ctx context.Context, tokenHash string) (store.Session, error)
+	RevokeSession(ctx context.Context, tokenHash string) error
+	PlanByCode(ctx context.Context, code string) (store.Plan, error)
+}
+
+// RateLimiter counts attempts against a key for a window.
+type RateLimiter interface {
+	Allow(ctx context.Context, key string, limit int, window time.Duration) (bool, error)
+}
+
 // Pinger is a liveness probe for an external dependency.
 type Pinger interface {
 	Ping(ctx context.Context) error
@@ -45,12 +60,14 @@ type Pinger interface {
 
 // Deps are the dependencies of the control API.
 type Deps struct {
-	Store    Store
-	Limits   Limiter
-	Lock     Locker
-	Registry *tunnel.Registry
-	Cfg      config.Config
-	Ready    []Pinger
+	Store        Store
+	Limits       Limiter
+	Lock         Locker
+	Registry     *tunnel.Registry
+	Cfg          config.Config
+	Ready        []Pinger
+	SessionStore SessionStore
+	RateLimiter  RateLimiter
 }
 
 // Server hosts the control-plane HTTP routes.
@@ -71,7 +88,8 @@ func New(deps Deps) *Server {
 func (s *Server) Handler() http.Handler {
 	authed := auth.BearerMiddleware(s.deps.Store)(s.mux)
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.URL.Path == "/healthz" || r.URL.Path == "/readyz" {
+		switch r.URL.Path {
+		case "/healthz", "/readyz", "/v1/auth/signup", "/v1/auth/login":
 			s.mux.ServeHTTP(w, r)
 			return
 		}
@@ -90,4 +108,8 @@ func (s *Server) routes() {
 	s.mux.HandleFunc("GET /v1/tunnels/{tunnel_id}/requests/{request_id}", s.handleGetRequest)
 	s.mux.HandleFunc("GET /v1/usage/today", s.handleUsageToday)
 	s.mux.HandleFunc("GET /v1/usage/month", s.handleUsageMonth)
+	s.mux.HandleFunc("POST /v1/auth/signup", s.handleSignup)
+	s.mux.HandleFunc("POST /v1/auth/login", s.handleLogin)
+	s.mux.HandleFunc("POST /v1/auth/logout", s.handleLogout)
+	s.mux.HandleFunc("GET /v1/auth/me", s.handleMe)
 }
