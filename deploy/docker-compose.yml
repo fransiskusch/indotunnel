@@ -25,5 +25,28 @@ services:
       timeout: 3s
       retries: 20
 
+  server:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile.server
+    environment:
+      DATABASE_URL: postgres://indotunnel:indotunnel@postgres:5432/indotunnel?sslmode=disable
+      REDIS_URL: redis://redis:6379/0
+      EDGE_ADDR: ":8080"
+      API_ADDR: ":8081"
+      TUNNEL_ADDR: ":7000"
+      PUBLIC_HOST_SUFFIX: indotunnel.localhost
+      PUBLIC_SCHEME: http
+      CLIENT_IP_HASH_SALT: local-dev-salt
+    ports:
+      - "8080:8080"
+      - "8081:8081"
+      - "7000:7000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
 volumes:
   pgdata:
