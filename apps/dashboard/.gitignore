@@ -1,0 +1,15 @@
+# deps
+/node_modules
+
+# next
+/.next/
+/out/
+
+# misc
+.DS_Store
+*.pem
+.env*
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
