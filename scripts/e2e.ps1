@@ -66,6 +66,23 @@ try {
     $dash = curl.exe -s "http://localhost:3000/login"
     if ($dash -notmatch "IndoTunnel") { Write-Host "E2E FAILED: dashboard not reachable"; exit 1 }
 
+    # Browser path: login through the dashboard's /api rewrite, then use the
+    # returned cookie to call a session endpoint. Proves the container's
+    # Next -> Go rewrite targets the right API base.
+    $proxyLogin = (curl.exe -s -i -X POST "http://localhost:3000/api/auth/login" `
+        -H "Origin: http://localhost:3000" `
+        -H "Content-Type: application/json" `
+        --data-binary "@$bodyFile") -join "`n"
+    if ($proxyLogin -notmatch "HTTP/1.1 200") {
+        Write-Host "E2E FAILED: dashboard /api login"; Write-Host $proxyLogin; exit 1
+    }
+    $proxyCookie = ($proxyLogin -split "`n" | Select-String -Pattern "Set-Cookie: (indotunnel_session=[^;]+)" |
+        Select-Object -First 1).Matches.Groups[1].Value
+    $proxyTunnels = curl.exe -s "http://localhost:3000/api/tunnels" -H "Cookie: $proxyCookie"
+    if ($proxyTunnels -notmatch [regex]::Escape($hostName)) {
+        Write-Host "E2E FAILED: dashboard /api tunnels"; Write-Host $proxyTunnels; exit 1
+    }
+
     Write-Host "E2E OK"
 }
 finally {

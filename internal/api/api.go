@@ -126,9 +126,11 @@ func isSessionPath(r *http.Request) bool {
 	return false
 }
 
-// sessionHandler wraps the cookie-authenticated routes with SessionMiddleware.
+// sessionHandler wraps the cookie-authenticated routes with SessionMiddleware
+// then a CSRF origin check, so every mutating session route is protected.
 func (s *Server) sessionHandler() http.Handler {
-	return auth.SessionMiddleware(s.deps.SessionStore, auth.CookieName)(s.sessionMux)
+	h := auth.SessionMiddleware(s.deps.SessionStore, auth.CookieName)(s.sessionMux)
+	return auth.CSRFMiddleware(s.deps.Cfg.DashboardOrigin)(h)
 }
 
 // sessionRoutes registers cookie-authenticated endpoints.

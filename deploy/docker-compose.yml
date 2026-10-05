@@ -54,6 +54,8 @@ services:
     build:
       context: ..
       dockerfile: deploy/Dockerfile.dashboard
+      args:
+        API_BASE_URL: http://server:8081
     environment:
       API_BASE_URL: http://server:8081
     ports:

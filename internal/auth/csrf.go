@@ -4,6 +4,8 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
+
+	"indotunnel/internal/httpx"
 )
 
 // CheckOrigin reports whether an unsafe request's Origin (or Referer) matches
@@ -33,4 +35,18 @@ func sameOrigin(a, b string) bool {
 		return false
 	}
 	return strings.EqualFold(ua.Scheme, ub.Scheme) && strings.EqualFold(ua.Host, ub.Host)
+}
+
+// CSRFMiddleware rejects unsafe requests whose Origin does not match allowed.
+// Apply it to any mux serving cookie-authenticated routes.
+func CSRFMiddleware(allowed string) func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			if !CheckOrigin(r, allowed) {
+				httpx.WriteError(w, http.StatusForbidden, "CSRF_ORIGIN_MISMATCH", "Origin not allowed.")
+				return
+			}
+			next.ServeHTTP(w, r)
+		})
+	}
 }

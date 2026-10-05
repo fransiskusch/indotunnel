@@ -1,6 +1,10 @@
 # Build stage
 FROM node:24-alpine AS build
 WORKDIR /app
+# The Next rewrite destination is resolved at build time, so the API base must
+# be known here (in compose this is http://server:8081).
+ARG API_BASE_URL=http://localhost:8081
+ENV API_BASE_URL=$API_BASE_URL
 COPY apps/dashboard/package.json apps/dashboard/package-lock.json ./
 RUN npm ci
 COPY apps/dashboard/ ./
