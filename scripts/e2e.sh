@@ -27,9 +27,12 @@ for i in $(seq 1 30); do
   sleep 1
 done
 
-SUB="$(grep -oE 'https?://[a-z0-9]+\.indotunnel\.localhost' /tmp/agent.out | head -1)"
+SUB="$(grep -oE 'https?://[a-z0-9]+\.indotunnel\.localhost(:[0-9]+)?' /tmp/agent.out | head -1)"
 HOST="${SUB#*//}"
+HOST="${HOST%%:*}"
+PORT="${SUB##*:}"
+[ "$PORT" = "$SUB" ] && PORT=80
 echo "public: $SUB"
 
-BODY="$(curl -s --resolve "${HOST}:8080:127.0.0.1" "${SUB}/")"
+BODY="$(curl -s --resolve "${HOST}:${PORT}:127.0.0.1" "${SUB}/")"
 echo "$BODY" | grep -q "Directory listing" && echo "E2E OK"

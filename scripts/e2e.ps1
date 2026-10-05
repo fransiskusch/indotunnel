@@ -11,14 +11,20 @@ $port = if ($env:LOCAL_PORT) { $env:LOCAL_PORT } else { 3999 }
 $token = (go run ./cmd/seed).Trim()
 Write-Host "seeded token"
 
-# local backend: tiny Go server returning a marker
-$backend = Start-Process go -ArgumentList "run", "$PSScriptRoot/../cmd/testbackend" -PassThru -NoNewWindow
-Start-Sleep -Seconds 3
+# Build binaries once so Start-Process does not leave orphaned `go run` children
+# holding the output pipe (which makes this script hang on exit).
+$bin = Join-Path $env:TEMP "indotunnel-e2e"
+New-Item -ItemType Directory -Force -Path $bin | Out-Null
+go build -o (Join-Path $bin "agent.exe") ./cmd/agent
+go build -o (Join-Path $bin "testbackend.exe") ./cmd/testbackend
+
+$backend = Start-Process (Join-Path $bin "testbackend.exe") -PassThru -NoNewWindow
+Start-Sleep -Seconds 2
 
 $env:INDOTUNNEL_TOKEN = $token
 $env:INDOTUNNEL_API = $api
 $env:INDOTUNNEL_TUNNEL = $tunnel
-$agent = Start-Process go -ArgumentList "run", "./cmd/agent", "$port" -PassThru -NoNewWindow `
+$agent = Start-Process (Join-Path $bin "agent.exe") -ArgumentList "$port" -PassThru -NoNewWindow `
   -RedirectStandardOutput "$env:TEMP\e2e-agent.out" -RedirectStandardError "$env:TEMP\e2e-agent.err"
 
 try {

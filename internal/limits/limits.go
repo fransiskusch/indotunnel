@@ -59,6 +59,16 @@ func bandwidthKey(userID string) string {
 	return fmt.Sprintf("indotunnel:usage:%s:bandwidth:%s", userID, JakartaNow().Format("2006-01"))
 }
 
+// DailyUsed returns the user's current daily request count without incrementing.
+func (c *Checker) DailyUsed(ctx context.Context, userID string) (int64, error) {
+	key := fmt.Sprintf("indotunnel:usage:%s:requests:%s", userID, JakartaNow().Format("2006-01-02"))
+	n, err := c.rdb.Get(ctx, key).Int64()
+	if err == redis.Nil {
+		return 0, nil
+	}
+	return n, err
+}
+
 // AddBandwidth adds actual transferred bytes to the user's monthly counter.
 func (c *Checker) AddBandwidth(ctx context.Context, userID string, bytes int64) error {
 	if bytes <= 0 {

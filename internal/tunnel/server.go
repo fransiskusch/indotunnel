@@ -14,12 +14,13 @@ import (
 
 // SessionMeta is what authFunc resolves from a handshake.
 type SessionMeta struct {
-	UserID            string
-	UserUUID          uuid.UUID
-	TunnelID          string
-	TunnelUUID        uuid.UUID
-	Subdomain         string
-	DailyRequestLimit int64
+	UserID                string
+	UserUUID              uuid.UUID
+	TunnelID              string
+	TunnelUUID            uuid.UUID
+	Subdomain             string
+	DailyRequestLimit     int64
+	MonthlyBandwidthLimit int64
 }
 
 // AuthFunc validates a handshake and returns the session metadata, or an error
@@ -95,10 +96,12 @@ func (s *Server) handle(ctx context.Context, conn net.Conn) {
 	}
 	defer sess.Close()
 
+	_ = conn.SetWriteDeadline(time.Now().Add(timeout))
 	if err := WriteAck(conn, Ack{Status: "ready", PublicURL: s.PublicURL(meta.Subdomain)}); err != nil {
 		s.logger().Warn("tunnel: write ack", "err", err)
 		return
 	}
+	_ = conn.SetWriteDeadline(time.Time{})
 
 	if s.OnConnect != nil {
 		s.OnConnect(meta, hs.ConnectionID, sess)
@@ -108,7 +111,11 @@ func (s *Server) handle(ctx context.Context, conn net.Conn) {
 	}
 	s.logger().Info("tunnel: connected", "tunnel", meta.TunnelID, "subdomain", meta.Subdomain)
 
-	<-ctx.Done()
+	select {
+	case <-ctx.Done():
+	case <-sess.CloseChan():
+		s.logger().Info("tunnel: disconnected", "tunnel", meta.TunnelID, "subdomain", meta.Subdomain)
+	}
 }
 
 func (s *Server) logger() *slog.Logger {

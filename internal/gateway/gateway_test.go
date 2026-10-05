@@ -8,22 +8,31 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"strings"
+	"sync"
 	"testing"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/hashicorp/yamux"
 
 	"indotunnel/internal/config"
+	"indotunnel/internal/reqlog"
+	"indotunnel/internal/store"
 	"indotunnel/internal/tunnel"
 )
 
 type fakeLimiter struct {
 	allowed bool
 	used    int64
+	month   int64
 }
 
 func (f fakeLimiter) CheckAndIncrDaily(ctx context.Context, u string, limit int64) (bool, int64, error) {
 	return f.allowed, f.used, nil
+}
+
+func (f fakeLimiter) MonthBandwidth(ctx context.Context, u string) (int64, error) {
+	return f.month, nil
 }
 
 type singleRegistry struct{ s *tunnel.Session }
@@ -137,6 +146,119 @@ func TestGatewayUnknownHost(t *testing.T) {
 	g.ServeHTTP(rec, req)
 	if rec.Code != 404 {
 		t.Fatalf("code=%d", rec.Code)
+	}
+}
+
+func TestGatewayBandwidthExceeded(t *testing.T) {
+	sess := newTunnelPair(t, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {}), "bw")
+	g := New(config.Config{PublicHostSuffix: "indotunnel.localhost"}, singleRegistry{sess},
+		fakeLimiter{allowed: true, month: 10737418240}, nil)
+	req := httptest.NewRequest("GET", "http://bw.indotunnel.localhost/", nil)
+	req.Host = "bw.indotunnel.localhost"
+	rec := httptest.NewRecorder()
+	g.ServeHTTP(rec, req)
+	if rec.Code != 429 {
+		t.Fatalf("code=%d body=%s", rec.Code, rec.Body.String())
+	}
+	if !strings.Contains(rec.Body.String(), "BANDWIDTH_LIMIT_REACHED") {
+		t.Fatalf("body=%s", rec.Body.String())
+	}
+}
+
+func TestGatewayConcurrentStreamCap(t *testing.T) {
+	release := make(chan struct{})
+	entered := make(chan struct{}, 1)
+	backend := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		select {
+		case entered <- struct{}{}:
+		default:
+		}
+		<-release
+	})
+	sess := newTunnelPair(t, backend, "cap")
+	sess.StreamSem = make(chan struct{}, 1)
+	g := New(config.Config{PublicHostSuffix: "indotunnel.localhost", MaxStreamsPerTunnel: 1},
+		singleRegistry{sess}, fakeLimiter{allowed: true}, nil)
+
+	// First request holds the only slot.
+	firstDone := make(chan struct{})
+	go func() {
+		req := httptest.NewRequest("GET", "http://cap.indotunnel.localhost/", nil)
+		req.Host = "cap.indotunnel.localhost"
+		g.ServeHTTP(httptest.NewRecorder(), req)
+		close(firstDone)
+	}()
+	select {
+	case <-entered:
+	case <-time.After(3 * time.Second):
+		t.Fatal("first request never reached backend")
+	}
+
+	req := httptest.NewRequest("GET", "http://cap.indotunnel.localhost/", nil)
+	req.Host = "cap.indotunnel.localhost"
+	rec := httptest.NewRecorder()
+	g.ServeHTTP(rec, req)
+	if rec.Code != 503 {
+		t.Fatalf("code=%d", rec.Code)
+	}
+	if !strings.Contains(rec.Body.String(), "TOO_MANY_CONCURRENT_STREAMS") {
+		t.Fatalf("body=%s", rec.Body.String())
+	}
+	close(release)
+	<-firstDone
+}
+
+// recordingInserter captures records passed through the logger.
+type recordingInserter struct {
+	mu   sync.Mutex
+	rows []store.RequestLog
+}
+
+func (r *recordingInserter) InsertRequestLogs(ctx context.Context, logs []store.RequestLog) error {
+	r.mu.Lock()
+	r.rows = append(r.rows, logs...)
+	r.mu.Unlock()
+	return nil
+}
+
+func TestGatewayCountsChunkedRequestBody(t *testing.T) {
+	backend := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		_, _ = io.Copy(io.Discard, r.Body)
+		w.WriteHeader(200)
+	})
+	sess := newTunnelPair(t, backend, "chunk")
+	ins := &recordingInserter{}
+	logger := reqlog.New(ins, nil, 10)
+	defer logger.Close(context.Background())
+	g := New(config.Config{PublicHostSuffix: "indotunnel.localhost"}, singleRegistry{sess}, fakeLimiter{allowed: true}, logger)
+
+	// A body reader with unknown length (ContentLength -1) exercises the
+	// chunked/streaming path.
+	payload := strings.Repeat("x", 5000)
+	req := httptest.NewRequest("POST", "http://chunk.indotunnel.localhost/", io.NopCloser(strings.NewReader(payload)))
+	req.Host = "chunk.indotunnel.localhost"
+	req.ContentLength = -1
+	rec := httptest.NewRecorder()
+	g.ServeHTTP(rec, req)
+
+	// Force the logger to flush.
+	deadline := time.Now().Add(2 * time.Second)
+	for time.Now().Before(deadline) {
+		ins.mu.Lock()
+		n := len(ins.rows)
+		ins.mu.Unlock()
+		if n > 0 {
+			break
+		}
+		time.Sleep(20 * time.Millisecond)
+	}
+	ins.mu.Lock()
+	defer ins.mu.Unlock()
+	if len(ins.rows) == 0 {
+		t.Fatal("no request log recorded")
+	}
+	if ins.rows[0].RequestBytes != int64(len(payload)) {
+		t.Fatalf("RequestBytes=%d want %d", ins.rows[0].RequestBytes, len(payload))
 	}
 }
 

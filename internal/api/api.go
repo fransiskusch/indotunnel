@@ -28,6 +28,7 @@ type Store interface {
 // Limiter is the quota surface the API needs.
 type Limiter interface {
 	CheckAndIncrDaily(ctx context.Context, userID string, limit int64) (bool, int64, error)
+	DailyUsed(ctx context.Context, userID string) (int64, error)
 	MonthBandwidth(ctx context.Context, userID string) (int64, error)
 	AddBandwidth(ctx context.Context, userID string, bytes int64) error
 }
@@ -37,6 +38,11 @@ type Locker interface {
 	Lock(ctx context.Context, key string, ttl time.Duration) (func(), bool, error)
 }
 
+// Pinger is a liveness probe for an external dependency.
+type Pinger interface {
+	Ping(ctx context.Context) error
+}
+
 // Deps are the dependencies of the control API.
 type Deps struct {
 	Store    Store
@@ -44,6 +50,7 @@ type Deps struct {
 	Lock     Locker
 	Registry *tunnel.Registry
 	Cfg      config.Config
+	Ready    []Pinger
 }
 
 // Server hosts the control-plane HTTP routes.

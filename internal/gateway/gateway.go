@@ -10,6 +10,7 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"io"
 	"net"
 	"net/http"
 	"net/http/httputil"
@@ -32,6 +33,7 @@ type Registry interface {
 // Limiter enforces quotas.
 type Limiter interface {
 	CheckAndIncrDaily(ctx context.Context, userID string, limit int64) (bool, int64, error)
+	MonthBandwidth(ctx context.Context, userID string) (int64, error)
 }
 
 // Gateway is the public edge handler.
@@ -74,9 +76,32 @@ func (g *Gateway) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if sess.MonthlyBandwidthLimit > 0 {
+		monthBytes, err := g.limits.MonthBandwidth(r.Context(), sess.UserID.String())
+		if err == nil && monthBytes >= sess.MonthlyBandwidthLimit {
+			httpx.WriteError(w, http.StatusTooManyRequests, "BANDWIDTH_LIMIT_REACHED",
+				"Monthly bandwidth limit reached.")
+			return
+		}
+	}
+
 	started := time.Now()
 	requestID := "req_" + uuid.NewString()[:16]
 	rec := &countingWriter{ResponseWriter: w, status: 200}
+	reqBody := &countingReader{ReadCloser: r.Body}
+	r.Body = reqBody
+
+	// Per-session concurrent stream cap (spec §8.4).
+	if cap := g.cfg.MaxStreamsPerTunnel; cap > 0 {
+		select {
+		case sess.StreamSem <- struct{}{}:
+			defer func() { <-sess.StreamSem }()
+		default:
+			httpx.WriteError(w, http.StatusServiceUnavailable, "TOO_MANY_CONCURRENT_STREAMS",
+				"Too many concurrent streams for this tunnel.")
+			return
+		}
+	}
 
 	proxy := &httputil.ReverseProxy{
 		FlushInterval: -1,
@@ -111,13 +136,26 @@ func (g *Gateway) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			Path:          r.URL.Path,
 			Host:          r.Host,
 			StatusCode:    rec.status,
-			RequestBytes:  r.ContentLength,
+			RequestBytes:  reqBody.n,
 			ResponseBytes: rec.written,
 			DurationMS:    int(time.Since(started).Milliseconds()),
 			ClientIPHash:  hashIP(clientIP(r), g.cfg.ClientIPHashSalt),
 			StartedAt:     started,
 		})
 	}
+}
+
+// countingReader counts bytes actually read from the request body, so chunked
+// or unknown-length uploads are accounted as transferred (spec §8.2).
+type countingReader struct {
+	io.ReadCloser
+	n int64
+}
+
+func (c *countingReader) Read(p []byte) (int, error) {
+	n, err := c.ReadCloser.Read(p)
+	c.n += int64(n)
+	return n, err
 }
 
 var hopByHop = []string{
@@ -182,13 +220,9 @@ func writeOffline(w http.ResponseWriter) {
 	_, _ = w.Write([]byte(`{"error":"tunnel_offline","message":"The local developer tunnel is currently offline."}`))
 }
 
+// clientIP returns the direct peer address. The edge is the first hop, so we
+// do not trust an inbound X-Forwarded-For (it is spoofable).
 func clientIP(r *http.Request) string {
-	if xff := r.Header.Get("X-Forwarded-For"); xff != "" {
-		if i := strings.IndexByte(xff, ','); i != -1 {
-			return strings.TrimSpace(xff[:i])
-		}
-		return strings.TrimSpace(xff)
-	}
 	host, _, err := net.SplitHostPort(r.RemoteAddr)
 	if err != nil {
 		return r.RemoteAddr

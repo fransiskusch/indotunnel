@@ -86,6 +86,52 @@ func TestServerHandshakeAndStream(t *testing.T) {
 	}
 }
 
+func TestServerOnDisconnectFiresOnPeerClose(t *testing.T) {
+	l, err := net.Listen("tcp", "127.0.0.1:0")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer l.Close()
+
+	disconnected := make(chan string, 1)
+	srv := &Server{
+		Auth: func(hs Handshake) (SessionMeta, error) {
+			return SessionMeta{UserID: "u1", TunnelID: hs.TunnelID, Subdomain: "abcde"}, nil
+		},
+		OnConnect:    func(meta SessionMeta, connID string, s *yamux.Session) {},
+		OnDisconnect: func(meta SessionMeta, connID string) { disconnected <- connID },
+		PublicURL:    func(string) string { return "" },
+	}
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	go srv.Serve(ctx, l)
+
+	conn, err := net.Dial("tcp", l.Addr().String())
+	if err != nil {
+		t.Fatal(err)
+	}
+	_ = WriteHandshake(conn, Handshake{TunnelID: "t_1", APIKey: "k", ConnectionID: "c1"})
+	if _, err := ReadAck(conn); err != nil {
+		t.Fatal(err)
+	}
+	client, err := yamux.Client(conn, yamux.DefaultConfig())
+	if err != nil {
+		t.Fatal(err)
+	}
+	// Simulate the agent going away.
+	_ = client.Close()
+	_ = conn.Close()
+
+	select {
+	case id := <-disconnected:
+		if id != "c1" {
+			t.Fatalf("connID=%q", id)
+		}
+	case <-time.After(3 * time.Second):
+		t.Fatal("OnDisconnect never fired after peer close")
+	}
+}
+
 func TestServerRejectsBadAuth(t *testing.T) {
 	l, _ := net.Listen("tcp", "127.0.0.1:0")
 	defer l.Close()

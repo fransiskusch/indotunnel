@@ -66,6 +66,10 @@ func (s *Server) handleCreateTunnel(w http.ResponseWriter, r *http.Request) {
 	if req.Protocol == "" {
 		req.Protocol = "http"
 	}
+	if req.Protocol != "http" && req.Protocol != "https" {
+		httpx.WriteError(w, http.StatusBadRequest, "INVALID_PROTOCOL", "protocol must be http or https.")
+		return
+	}
 	if err := validateTarget(req.LocalHost, req.LocalPort); err != nil {
 		httpx.WriteError(w, http.StatusBadRequest, "INVALID_TARGET", err.Error())
 		return
@@ -179,7 +183,7 @@ func (s *Server) handleStopTunnel(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if s.deps.Registry != nil {
-		s.deps.Registry.Remove(t.Subdomain, "")
+		s.deps.Registry.RemoveSubdomain(t.Subdomain)
 	}
 	writeJSON(w, http.StatusOK, map[string]string{"status": "offline"})
 }
@@ -206,9 +210,15 @@ func (s *Server) handleListRequests(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) handleGetRequest(w http.ResponseWriter, r *http.Request) {
-	_, _ = auth.UserFrom(r.Context())
+	user, _ := auth.UserFrom(r.Context())
+	tunnelID := r.PathValue("tunnel_id")
+	t, err := s.deps.Store.TunnelByID(r.Context(), tunnelID)
+	if err != nil || t.UserID != user.ID {
+		httpx.WriteError(w, http.StatusNotFound, "TUNNEL_NOT_FOUND", "Tunnel not found.")
+		return
+	}
 	log, err := s.deps.Store.RequestByID(r.Context(), r.PathValue("request_id"))
-	if err != nil {
+	if err != nil || log.UserID != user.ID {
 		httpx.WriteError(w, http.StatusNotFound, "REQUEST_NOT_FOUND", "Request not found.")
 		return
 	}
@@ -231,15 +241,14 @@ func requestJSON(l store.RequestLog) map[string]any {
 
 func (s *Server) handleUsageToday(w http.ResponseWriter, r *http.Request) {
 	user, _ := auth.UserFrom(r.Context())
-	_, used, err := s.deps.Limits.CheckAndIncrDaily(r.Context(), user.ID.String(), 1<<62)
+	used, err := s.deps.Limits.DailyUsed(r.Context(), user.ID.String())
 	if err != nil {
 		httpx.WriteError(w, http.StatusServiceUnavailable, "REDIS_UNAVAILABLE", "Usage lookup failed.")
 		return
 	}
 	writeJSON(w, http.StatusOK, map[string]any{
-		"requests": user.Plan.DailyRequestLimit,
-		"used":     used,
-		"limit":    user.Plan.DailyRequestLimit,
+		"used":  used,
+		"limit": user.Plan.DailyRequestLimit,
 	})
 }
 

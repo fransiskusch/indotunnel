@@ -15,6 +15,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/hashicorp/yamux"
+	"github.com/redis/go-redis/v9"
 
 	"indotunnel/internal/api"
 	"indotunnel/internal/auth"
@@ -64,7 +65,7 @@ func run(log *slog.Logger) error {
 	checker := limits.New(rdb)
 	locker := redisclient.NewLocker(rdb)
 
-	logger := reqlog.New(st, checker, 1024)
+	logger := reqlog.NewWithUsage(st, checker, st, 1024)
 	defer func() {
 		cctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
@@ -79,6 +80,7 @@ func run(log *slog.Logger) error {
 		Lock:     locker,
 		Registry: registry,
 		Cfg:      cfg,
+		Ready:    []api.Pinger{redisPinger{rdb}},
 	})
 
 	gw := gateway.New(cfg, registry, checker, logger)
@@ -123,17 +125,19 @@ func run(log *slog.Logger) error {
 				return tunnel.SessionMeta{}, errors.New("tunnel does not belong to user")
 			}
 			return tunnel.SessionMeta{
-				UserID:            user.ID.String(),
-				UserUUID:          user.ID,
-				TunnelUUID:        t.ID,
-				TunnelID:          t.TunnelID,
-				Subdomain:         t.Subdomain,
-				DailyRequestLimit: user.Plan.DailyRequestLimit,
+				UserID:                user.ID.String(),
+				UserUUID:              user.ID,
+				TunnelUUID:            t.ID,
+				TunnelID:              t.TunnelID,
+				Subdomain:             t.Subdomain,
+				DailyRequestLimit:     user.Plan.DailyRequestLimit,
+				MonthlyBandwidthLimit: user.Plan.MonthlyBandwidthLimitBytes,
 			}, nil
 		},
 		OnConnect: func(meta tunnel.SessionMeta, connID string, s *yamux.Session) {
-			registry.Register(meta.Subdomain, tunnel.NewSession(
-				connID, meta.UserUUID, meta.TunnelUUID, meta.Subdomain, meta.DailyRequestLimit, s))
+			registry.Register(meta.Subdomain, tunnel.NewSessionSized(
+				connID, meta.UserUUID, meta.TunnelUUID, meta.Subdomain,
+				meta.DailyRequestLimit, meta.MonthlyBandwidthLimit, cfg.MaxStreamsPerTunnel, s))
 			if err := st.MarkTunnelConnected(ctx, meta.TunnelID); err != nil {
 				log.Warn("mark connected", "err", err)
 			}
@@ -158,6 +162,9 @@ func run(log *slog.Logger) error {
 	go func() { errCh <- edgeHTTP.Serve(edgeLn) }()
 	go func() { errCh <- tunnelSrv.Serve(ctx, tunnelLn) }()
 
+	// Retention job: delete request metadata older than the configured window.
+	go retentionLoop(ctx, st, cfg.RequestLogRetentionDays, log)
+
 	log.Info("server started", "api", cfg.APIAddr, "edge", cfg.EdgeAddr, "tunnel", cfg.TunnelAddr)
 
 	select {
@@ -174,4 +181,39 @@ func run(log *slog.Logger) error {
 	_ = apiHTTP.Shutdown(shutdownCtx)
 	_ = edgeHTTP.Shutdown(shutdownCtx)
 	return nil
+}
+
+// redisPinger adapts *redis.Client to api.Pinger.
+type redisPinger struct{ c *redis.Client }
+
+func (p redisPinger) Ping(ctx context.Context) error { return p.c.Ping(ctx).Err() }
+
+// retentionLoop deletes request metadata older than days, once at startup and
+// then hourly, until ctx is cancelled.
+func retentionLoop(ctx context.Context, st *store.Store, days int, log *slog.Logger) {
+	if days <= 0 {
+		return
+	}
+	age := time.Duration(days) * 24 * time.Hour
+	tick := func() {
+		n, err := st.DeleteOldRequestLogs(ctx, age)
+		if err != nil {
+			log.Warn("retention cleanup failed", "err", err)
+			return
+		}
+		if n > 0 {
+			log.Info("retention cleanup", "deleted", n)
+		}
+	}
+	tick()
+	t := time.NewTicker(time.Hour)
+	defer t.Stop()
+	for {
+		select {
+		case <-ctx.Done():
+			return
+		case <-t.C:
+			tick()
+		}
+	}
 }

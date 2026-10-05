@@ -51,7 +51,7 @@ func Load() (Config, error) {
 		return Config{}, err
 	}
 	return Config{
-		DatabaseURL:             env("DATABASE_URL", "postgres://indotunnel:indotunnel@localhost:5432/indotunnel?sslmode=disable"),
+		DatabaseURL:             env("DATABASE_URL", "postgres://indotunnel:indotunnel@localhost:55432/indotunnel?sslmode=disable"),
 		RedisURL:                env("REDIS_URL", "redis://localhost:6379/0"),
 		EdgeAddr:                env("EDGE_ADDR", ":8080"),
 		APIAddr:                 env("API_ADDR", ":8081"),

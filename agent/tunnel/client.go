@@ -6,6 +6,7 @@ import (
 	"errors"
 	"math/rand/v2"
 	"net"
+	"strconv"
 	"time"
 
 	"github.com/hashicorp/yamux"
@@ -70,7 +71,9 @@ func (discard) Write(p []byte) (int, error) { return len(p), nil }
 
 // RunWithReconnect keeps a tunnel session alive, reconnecting with backoff
 // until ctx is cancelled. onSession is called with each new session and should
-// block while serving; onStatus receives "connected"/"reconnecting".
+// block while serving; onStatus receives "connected"/"reconnecting". A fresh
+// connection id is generated for every dial so the server sees each reconnect
+// as a distinct session.
 func RunWithReconnect(ctx context.Context, addr string, hs indotunnel.Handshake,
 	onSession func(*yamux.Session) error, onStatus func(string)) error {
 	attempt := 0
@@ -78,6 +81,7 @@ func RunWithReconnect(ctx context.Context, addr string, hs indotunnel.Handshake,
 		if ctx.Err() != nil {
 			return ctx.Err()
 		}
+		hs.ConnectionID = "conn-" + strconv.FormatInt(time.Now().UnixNano(), 36)
 		sess, err := Dial(ctx, addr, hs)
 		if err != nil {
 			if onStatus != nil {

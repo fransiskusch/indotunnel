@@ -285,6 +285,17 @@ func (s *Store) RequestsByTunnel(ctx context.Context, tunnelID uuid.UUID, limit 
 	return out, rows.Err()
 }
 
+// DeleteOldRequestLogs deletes request metadata older than the given age and
+// returns the number of rows removed.
+func (s *Store) DeleteOldRequestLogs(ctx context.Context, olderThan time.Duration) (int64, error) {
+	cutoff := time.Now().Add(-olderThan)
+	tag, err := s.pool.Exec(ctx, `DELETE FROM request_logs WHERE started_at < $1`, cutoff)
+	if err != nil {
+		return 0, err
+	}
+	return tag.RowsAffected(), nil
+}
+
 // RequestByID loads a single request log row.
 func (s *Store) RequestByID(ctx context.Context, requestID string) (RequestLog, error) {
 	var l RequestLog

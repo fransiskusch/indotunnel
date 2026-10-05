@@ -14,6 +14,7 @@ import (
 	"indotunnel/internal/config"
 	"indotunnel/internal/limits"
 	"indotunnel/internal/store"
+	"indotunnel/internal/tunnel"
 )
 
 func TestRejectNonLoopback(t *testing.T) {
@@ -89,6 +90,7 @@ func (f *fakeLimits) CheckAndIncrDaily(ctx context.Context, u string, limit int6
 func (f *fakeLimits) MonthBandwidth(ctx context.Context, u string) (int64, error) {
 	return f.month, nil
 }
+func (f *fakeLimits) DailyUsed(ctx context.Context, u string) (int64, error)    { return f.used, nil }
 func (f *fakeLimits) AddBandwidth(ctx context.Context, u string, b int64) error { return nil }
 
 type fakeLocker struct{ ok bool }
@@ -111,7 +113,7 @@ func testUser() store.User {
 	}
 }
 
-func newTestAPI(st *fakeStore, lim *fakeLimits, lock *fakeLocker) *Server {
+func newTestAPI(st *fakeStore, lim Limiter, lock *fakeLocker) *Server {
 	cfg := config.Config{
 		PublicScheme:     "http",
 		PublicHostSuffix: "indotunnel.localhost",
@@ -193,6 +195,62 @@ func TestUsageToday(t *testing.T) {
 	}
 	if !strings.Contains(rec.Body.String(), "1283") {
 		t.Fatalf("body=%s", rec.Body.String())
+	}
+}
+
+// countingLimiter records whether the mutating increment was called.
+type countingLimiter struct {
+	fakeLimits
+	incrCalls int
+}
+
+func (c *countingLimiter) CheckAndIncrDaily(ctx context.Context, u string, limit int64) (bool, int64, error) {
+	c.incrCalls++
+	return true, c.used, nil
+}
+
+func TestUsageTodayDoesNotIncrement(t *testing.T) {
+	st := &fakeStore{}
+	lim := &countingLimiter{fakeLimits: fakeLimits{used: 42}}
+	srv := newTestAPI(st, lim, &fakeLocker{ok: true})
+	rec := doAuthed(srv, "GET", "/v1/usage/today", "")
+	if rec.Code != 200 {
+		t.Fatalf("code=%d", rec.Code)
+	}
+	if lim.incrCalls != 0 {
+		t.Fatalf("usage read incremented counter %d times", lim.incrCalls)
+	}
+	if !strings.Contains(rec.Body.String(), "42") {
+		t.Fatalf("body=%s", rec.Body.String())
+	}
+}
+
+func TestStopTunnelEvictsRegistry(t *testing.T) {
+	st := &fakeStore{byID: store.Tunnel{
+		UserID: testUser().ID, Subdomain: "abcde", TunnelID: "t_1", Status: "online",
+	}}
+	reg := tunnel.NewRegistry()
+	reg.Register("abcde", tunnel.NewSession("conn-1", testUser().ID, uuid.New(), "abcde", 5000, 10737418240, nil))
+	srv := New(Deps{Store: st, Limits: &fakeLimits{}, Lock: &fakeLocker{ok: true},
+		Registry: reg, Cfg: config.Config{}})
+	rec := doAuthed(srv, "POST", "/v1/tunnels/t_1/stop", "")
+	if rec.Code != 200 {
+		t.Fatalf("code=%d body=%s", rec.Code, rec.Body.String())
+	}
+	if _, ok := reg.Lookup("abcde"); ok {
+		t.Fatal("registry still serves the stopped tunnel")
+	}
+}
+
+func TestGetRequestRejectsForeignRequest(t *testing.T) {
+	st := &fakeStore{
+		byID:     store.Tunnel{UserID: testUser().ID, Subdomain: "abcde", TunnelID: "t_1"},
+		requests: []store.RequestLog{{RequestID: "req_x", UserID: uuid.New()}}, // owned by someone else
+	}
+	srv := newTestAPI(st, &fakeLimits{}, &fakeLocker{ok: true})
+	rec := doAuthed(srv, "GET", "/v1/tunnels/t_1/requests/req_x", "")
+	if rec.Code != 404 {
+		t.Fatalf("code=%d body=%s", rec.Code, rec.Body.String())
 	}
 }
 

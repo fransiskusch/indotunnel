@@ -93,6 +93,7 @@ func run(args []string) error {
 
 	fmt.Print(cli.Connected(tr.PublicURL, host, port, "jakarta", "Free", 0, 5000))
 
+	printed := false
 	return atunnel.RunWithReconnect(ctx, tunnelAddr, hs, func(s *yamux.Session) error {
 		srv, err := forward.New(fmt.Sprintf("%s:%d", host, port), 20)
 		if err != nil {
@@ -101,7 +102,13 @@ func run(args []string) error {
 		ln := itunnel.Listener(s)
 		return srv.Serve(ln)
 	}, func(status string) {
-		if status == "reconnecting" {
+		switch status {
+		case "connected":
+			if !printed {
+				fmt.Print(cli.Connected(tr.PublicURL, host, port, "jakarta", "Free", 0, 5000))
+				printed = true
+			}
+		case "reconnecting":
 			fmt.Fprintln(os.Stderr, "connection lost, reconnecting...")
 		}
 	})

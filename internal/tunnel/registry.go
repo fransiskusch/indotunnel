@@ -109,24 +109,39 @@ func ReadAck(r io.Reader) (Ack, error) {
 
 // Session is one active agent connection.
 type Session struct {
-	ConnID            string
-	UserID            uuid.UUID
-	TunnelID          uuid.UUID
-	Subdomain         string
-	DailyRequestLimit int64
-	yamux             *yamux.Session
+	ConnID                string
+	UserID                uuid.UUID
+	TunnelID              uuid.UUID
+	Subdomain             string
+	DailyRequestLimit     int64
+	MonthlyBandwidthLimit int64
+	// StreamSem caps concurrent streams for this tunnel. It is created once at
+	// construction and read-only afterwards.
+	StreamSem chan struct{}
+	yamux     *yamux.Session
 }
 
 // NewSession builds a Session around an established yamux session.
-func NewSession(connID string, userID, tunnelID uuid.UUID, subdomain string, limit int64, s *yamux.Session) *Session {
+func NewSession(connID string, userID, tunnelID uuid.UUID, subdomain string, dailyLimit, bwLimit int64, s *yamux.Session) *Session {
 	return &Session{
-		ConnID:            connID,
-		UserID:            userID,
-		TunnelID:          tunnelID,
-		Subdomain:         subdomain,
-		DailyRequestLimit: limit,
-		yamux:             s,
+		ConnID:                connID,
+		UserID:                userID,
+		TunnelID:              tunnelID,
+		Subdomain:             subdomain,
+		DailyRequestLimit:     dailyLimit,
+		MonthlyBandwidthLimit: bwLimit,
+		StreamSem:             make(chan struct{}, 20),
+		yamux:                 s,
 	}
+}
+
+// NewSessionSized is like NewSession but with an explicit stream cap.
+func NewSessionSized(connID string, userID, tunnelID uuid.UUID, subdomain string, dailyLimit, bwLimit int64, maxStreams int, s *yamux.Session) *Session {
+	sess := NewSession(connID, userID, tunnelID, subdomain, dailyLimit, bwLimit, s)
+	if maxStreams > 0 {
+		sess.StreamSem = make(chan struct{}, maxStreams)
+	}
+	return sess
 }
 
 // Yamux returns the underlying multiplexed session.
@@ -136,7 +151,7 @@ func (s *Session) Yamux() *yamux.Session { return s.yamux }
 // exists so integration-style tests in other packages can construct a session
 // without going through the network handshake.
 func NewSessionForTest(connID string, userID, tunnelID uuid.UUID, subdomain string, s *yamux.Session) *Session {
-	return NewSession(connID, userID, tunnelID, subdomain, 5000, s)
+	return NewSession(connID, userID, tunnelID, subdomain, 5000, 10737418240, s)
 }
 
 // Registry maps subdomains to their active sessions.
@@ -172,4 +187,19 @@ func (r *Registry) Remove(subdomain, connectionID string) {
 	if s, ok := r.sessions[subdomain]; ok && s.ConnID == connectionID {
 		delete(r.sessions, subdomain)
 	}
+}
+
+// RemoveSubdomain deletes whatever session is registered for a subdomain and
+// closes it, returning true if one existed. Used by the stop endpoint.
+func (r *Registry) RemoveSubdomain(subdomain string) bool {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	s, ok := r.sessions[subdomain]
+	if ok {
+		delete(r.sessions, subdomain)
+		if s.yamux != nil {
+			_ = s.yamux.Close()
+		}
+	}
+	return ok
 }

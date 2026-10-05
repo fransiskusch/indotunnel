@@ -22,6 +22,11 @@ type BandwidthAdder interface {
 	AddBandwidth(ctx context.Context, userID string, bytes int64) error
 }
 
+// UsageUpserter mirrors daily aggregates into durable storage.
+type UsageUpserter interface {
+	UpsertUsageDaily(ctx context.Context, userID uuid.UUID, date string, requests, bytesIn, bytesOut int64) error
+}
+
 // Record is one request's metadata. Field names mirror store.RequestLog.
 type Record struct {
 	RequestID     string
@@ -42,6 +47,7 @@ type Record struct {
 type Logger struct {
 	ins      Inserter
 	bw       BandwidthAdder
+	usage    UsageUpserter
 	ch       chan Record
 	dropped  atomic.Int64
 	stopped  chan struct{}
@@ -51,12 +57,19 @@ type Logger struct {
 
 // New builds a Logger with the given buffer size.
 func New(ins Inserter, bw BandwidthAdder, bufSize int) *Logger {
+	return NewWithUsage(ins, bw, nil, bufSize)
+}
+
+// NewWithUsage builds a Logger that also mirrors daily aggregates. usage may
+// be nil, in which case only request logs and bandwidth counters are written.
+func NewWithUsage(ins Inserter, bw BandwidthAdder, usage UsageUpserter, bufSize int) *Logger {
 	if bufSize < 1 {
 		bufSize = 1
 	}
 	l := &Logger{
 		ins:      ins,
 		bw:       bw,
+		usage:    usage,
 		ch:       make(chan Record, bufSize),
 		stopped:  make(chan struct{}),
 		flushInt: 500 * time.Millisecond,
@@ -131,9 +144,32 @@ func (l *Logger) persist(buf []Record) {
 	}
 	_ = l.ins.InsertRequestLogs(ctx, logs)
 
+	// Aggregate per user for the daily mirror and monthly counter.
+	type agg struct {
+		req     int64
+		in, out int64
+	}
+	byUser := map[uuid.UUID]*agg{}
 	for _, r := range buf {
-		if l.bw != nil && r.UserID != uuid.Nil {
+		if r.UserID == uuid.Nil {
+			continue
+		}
+		a := byUser[r.UserID]
+		if a == nil {
+			a = &agg{}
+			byUser[r.UserID] = a
+		}
+		a.req++
+		a.in += r.RequestBytes
+		a.out += r.ResponseBytes
+		if l.bw != nil {
 			_ = l.bw.AddBandwidth(ctx, r.UserID.String(), r.RequestBytes+r.ResponseBytes)
+		}
+	}
+	if l.usage != nil {
+		date := time.Now().Format("2006-01-02")
+		for uid, a := range byUser {
+			_ = l.usage.UpsertUsageDaily(ctx, uid, date, a.req, a.in, a.out)
 		}
 	}
 }
