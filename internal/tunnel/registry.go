@@ -8,6 +8,7 @@ import (
 	"io"
 	"sync"
 
+	"github.com/google/uuid"
 	"github.com/hashicorp/yamux"
 )
 
@@ -108,15 +109,23 @@ func ReadAck(r io.Reader) (Ack, error) {
 
 // Session is one active agent connection.
 type Session struct {
-	ConnID    string
-	UserID    string
-	TunnelID  string
-	Subdomain string
-	yamux     *yamux.Session
+	ConnID            string
+	UserID            uuid.UUID
+	TunnelID          uuid.UUID
+	Subdomain         string
+	DailyRequestLimit int64
+	yamux             *yamux.Session
 }
 
 // Yamux returns the underlying multiplexed session.
 func (s *Session) Yamux() *yamux.Session { return s.yamux }
+
+// NewSessionForTest builds a Session around an existing yamux session. It
+// exists so integration-style tests in other packages can construct a session
+// without going through the network handshake.
+func NewSessionForTest(connID string, userID, tunnelID uuid.UUID, subdomain string, s *yamux.Session) *Session {
+	return &Session{ConnID: connID, UserID: userID, TunnelID: tunnelID, Subdomain: subdomain, yamux: s}
+}
 
 // Registry maps subdomains to their active sessions.
 type Registry struct {
