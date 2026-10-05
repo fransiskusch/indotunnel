@@ -7,11 +7,20 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 // ErrNotFound is returned when a lookup matches no row.
 var ErrNotFound = errors.New("store: not found")
+
+// ErrEmailTaken is returned when creating a user with an existing email.
+var ErrEmailTaken = errors.New("store: email taken")
+
+func isUniqueViolation(err error) bool {
+	var pgErr *pgconn.PgError
+	return errors.As(err, &pgErr) && pgErr.Code == "23505"
+}
 
 type Store struct {
 	pool *pgxpool.Pool
@@ -33,12 +42,13 @@ type Plan struct {
 
 // User mirrors the users table joined with its plan.
 type User struct {
-	ID     uuid.UUID
-	PlanID uuid.UUID
-	Email  string
-	Name   string
-	Status string
-	Plan   Plan
+	ID           uuid.UUID
+	PlanID       uuid.UUID
+	Email        string
+	Name         string
+	Status       string
+	PasswordHash string
+	Plan         Plan
 }
 
 // Tunnel mirrors the tunnels table.
@@ -77,7 +87,7 @@ type RequestLog struct {
 // UserByAPIKey resolves an active api key (matched on prefix + hash) to its user.
 func (s *Store) UserByAPIKey(ctx context.Context, prefix, hash string) (User, error) {
 	row := s.pool.QueryRow(ctx, `
-		SELECT u.id, u.plan_id, u.email, COALESCE(u.name,''), u.status,
+		SELECT u.id, u.plan_id, u.email, COALESCE(u.name,''), u.status, u.password_hash,
 		       p.id, p.code, p.name, p.max_active_tunnels, p.daily_request_limit,
 		       p.monthly_bandwidth_limit_bytes, p.custom_subdomain_enabled, p.custom_domain_enabled
 		FROM api_keys k
@@ -91,7 +101,7 @@ func (s *Store) UserByAPIKey(ctx context.Context, prefix, hash string) (User, er
 // UserByID loads a user and its plan.
 func (s *Store) UserByID(ctx context.Context, id uuid.UUID) (User, error) {
 	row := s.pool.QueryRow(ctx, `
-		SELECT u.id, u.plan_id, u.email, COALESCE(u.name,''), u.status,
+		SELECT u.id, u.plan_id, u.email, COALESCE(u.name,''), u.status, u.password_hash,
 		       p.id, p.code, p.name, p.max_active_tunnels, p.daily_request_limit,
 		       p.monthly_bandwidth_limit_bytes, p.custom_subdomain_enabled, p.custom_domain_enabled
 		FROM users u JOIN plans p ON p.id = u.plan_id WHERE u.id=$1`, id)
@@ -100,7 +110,7 @@ func (s *Store) UserByID(ctx context.Context, id uuid.UUID) (User, error) {
 
 func scanUser(row pgx.Row) (User, error) {
 	var u User
-	err := row.Scan(&u.ID, &u.PlanID, &u.Email, &u.Name, &u.Status,
+	err := row.Scan(&u.ID, &u.PlanID, &u.Email, &u.Name, &u.Status, &u.PasswordHash,
 		&u.Plan.ID, &u.Plan.Code, &u.Plan.Name, &u.Plan.MaxActiveTunnels,
 		&u.Plan.DailyRequestLimit, &u.Plan.MonthlyBandwidthLimitBytes,
 		&u.Plan.CustomSubdomainEnabled, &u.Plan.CustomDomainEnabled)
