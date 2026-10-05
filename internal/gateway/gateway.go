@@ -121,14 +121,26 @@ func (g *Gateway) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 var hopByHop = []string{
-	"Connection", "Keep-Alive", "Proxy-Authenticate", "Proxy-Authorization",
-	"Te", "Trailer", "Transfer-Encoding", "Upgrade",
+	"Keep-Alive", "Proxy-Authenticate", "Proxy-Authorization",
+	"Te", "Trailer", "Transfer-Encoding",
 }
 
 func stripHopByHop(h http.Header) {
+	// Preserve Connection/Upgrade when this is a protocol upgrade (WebSocket),
+	// otherwise strip them too. httputil.ReverseProxy needs them intact to
+	// tunnel the upgrade.
+	if !isUpgrade(h) {
+		h.Del("Connection")
+		h.Del("Upgrade")
+	}
 	for _, k := range hopByHop {
 		h.Del(k)
 	}
+}
+
+func isUpgrade(h http.Header) bool {
+	return strings.EqualFold(h.Get("Connection"), "upgrade") ||
+		strings.Contains(strings.ToLower(h.Get("Connection")), "upgrade")
 }
 
 type countingWriter struct {
