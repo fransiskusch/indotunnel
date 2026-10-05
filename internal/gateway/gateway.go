@@ -20,6 +20,7 @@ import (
 	"github.com/google/uuid"
 
 	"indotunnel/internal/config"
+	"indotunnel/internal/events"
 	"indotunnel/internal/httpx"
 	"indotunnel/internal/reqlog"
 	"indotunnel/internal/tunnel"
@@ -42,6 +43,8 @@ type Gateway struct {
 	registry Registry
 	limits   Limiter
 	logger   *reqlog.Logger
+	// Bus, when set, receives a "request" event after each logged request.
+	Bus events.Bus
 }
 
 // New builds the edge gateway.
@@ -142,6 +145,9 @@ func (g *Gateway) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			ClientIPHash:  hashIP(clientIP(r), g.cfg.ClientIPHashSalt),
 			StartedAt:     started,
 		})
+	}
+	if g.Bus != nil {
+		g.Bus.Publish(events.Event{Type: "request", UserID: sess.UserID})
 	}
 }
 

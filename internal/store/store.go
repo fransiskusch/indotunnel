@@ -295,6 +295,39 @@ func (s *Store) RequestsByTunnel(ctx context.Context, tunnelID uuid.UUID, limit 
 	return out, rows.Err()
 }
 
+// DailyUsage is one day's aggregate for a user.
+type DailyUsage struct {
+	Date         string
+	RequestCount int64
+	BytesIn      int64
+	BytesOut     int64
+}
+
+// UsageHistory returns per-day aggregates for the last days days, oldest first.
+func (s *Store) UsageHistory(ctx context.Context, userID uuid.UUID, days int) ([]DailyUsage, error) {
+	if days < 1 {
+		days = 7
+	}
+	rows, err := s.pool.Query(ctx, `
+		SELECT usage_date::text, request_count, bytes_in, bytes_out
+		FROM usage_daily
+		WHERE user_id=$1 AND usage_date >= now()::date - $2::int
+		ORDER BY usage_date ASC`, userID, days)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	out := make([]DailyUsage, 0)
+	for rows.Next() {
+		var d DailyUsage
+		if err := rows.Scan(&d.Date, &d.RequestCount, &d.BytesIn, &d.BytesOut); err != nil {
+			return nil, err
+		}
+		out = append(out, d)
+	}
+	return out, rows.Err()
+}
+
 // DeleteOldRequestLogs deletes request metadata older than the given age and
 // returns the number of rows removed.
 func (s *Store) DeleteOldRequestLogs(ctx context.Context, olderThan time.Duration) (int64, error) {

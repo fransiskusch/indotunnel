@@ -24,6 +24,8 @@ type Store interface {
 	SetTunnelStatus(ctx context.Context, tunnelID, status string) error
 	RequestsByTunnel(ctx context.Context, tunnelID uuid.UUID, limit int) ([]store.RequestLog, error)
 	RequestByID(ctx context.Context, requestID string) (store.RequestLog, error)
+	TunnelsByUser(ctx context.Context, userID uuid.UUID) ([]store.Tunnel, error)
+	UsageHistory(ctx context.Context, userID uuid.UUID, days int) ([]store.DailyUsage, error)
 }
 
 // Limiter is the quota surface the API needs.
@@ -95,11 +97,14 @@ func (s *Server) Handler() http.Handler {
 	authed := auth.BearerMiddleware(s.deps.Store)(s.mux)
 	session := s.sessionHandler()
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		switch r.URL.Path {
-		case "/healthz", "/readyz", "/v1/auth/signup", "/v1/auth/login":
+		switch {
+		case r.URL.Path == "/healthz", r.URL.Path == "/readyz",
+			r.URL.Path == "/v1/auth/signup", r.URL.Path == "/v1/auth/login":
 			s.mux.ServeHTTP(w, r)
 			return
-		case "/v1/auth/logout", "/v1/auth/me", "/v1/events":
+		case r.URL.Path == "/v1/auth/logout", r.URL.Path == "/v1/auth/me",
+			r.URL.Path == "/v1/events", r.URL.Path == "/v1/usage/history",
+			r.URL.Path == "/v1/tunnels" && r.Method == http.MethodGet:
 			session.ServeHTTP(w, r)
 			return
 		}
@@ -117,6 +122,8 @@ func (s *Server) sessionRoutes() {
 	s.sessionMux.HandleFunc("POST /v1/auth/logout", s.handleLogout)
 	s.sessionMux.HandleFunc("GET /v1/auth/me", s.handleMe)
 	s.sessionMux.HandleFunc("GET /v1/events", s.handleEvents)
+	s.sessionMux.HandleFunc("GET /v1/tunnels", s.handleListTunnels)
+	s.sessionMux.HandleFunc("GET /v1/usage/history", s.handleUsageHistory)
 }
 
 // routes registers every control-plane endpoint on the internal mux.

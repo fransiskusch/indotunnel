@@ -21,6 +21,7 @@ import (
 	"indotunnel/internal/auth"
 	"indotunnel/internal/config"
 	"indotunnel/internal/db"
+	"indotunnel/internal/events"
 	"indotunnel/internal/gateway"
 	"indotunnel/internal/limits"
 	"indotunnel/internal/redisclient"
@@ -73,6 +74,7 @@ func run(log *slog.Logger) error {
 	}()
 
 	registry := tunnel.NewRegistry()
+	bus := events.New()
 
 	apiSrv := api.New(api.Deps{
 		Store:        st,
@@ -83,9 +85,11 @@ func run(log *slog.Logger) error {
 		Ready:        []api.Pinger{redisPinger{rdb}},
 		SessionStore: st,
 		RateLimiter:  checker,
+		Bus:          bus,
 	})
 
 	gw := gateway.New(cfg, registry, checker, logger)
+	gw.Bus = bus
 
 	apiLn, err := net.Listen("tcp", cfg.APIAddr)
 	if err != nil {
@@ -147,6 +151,8 @@ func run(log *slog.Logger) error {
 				connID, "local-1", "", ""); err != nil {
 				log.Warn("create session", "err", err)
 			}
+			bus.Publish(events.Event{Type: "tunnel.status", UserID: meta.UserUUID,
+				Payload: map[string]string{"status": "online", "tunnel_id": meta.TunnelID}})
 		},
 		OnDisconnect: func(meta tunnel.SessionMeta, connID string) {
 			registry.Remove(meta.Subdomain, connID)
@@ -156,6 +162,8 @@ func run(log *slog.Logger) error {
 			if err := st.SetTunnelStatus(ctx, meta.TunnelID, "offline"); err != nil {
 				log.Warn("set offline", "err", err)
 			}
+			bus.Publish(events.Event{Type: "tunnel.status", UserID: meta.UserUUID,
+				Payload: map[string]string{"status": "offline", "tunnel_id": meta.TunnelID}})
 		},
 	}
 

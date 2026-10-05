@@ -77,6 +77,12 @@ func (f *fakeStore) RequestByID(ctx context.Context, id string) (store.RequestLo
 	}
 	return f.requests[0], nil
 }
+func (f *fakeStore) TunnelsByUser(ctx context.Context, id uuid.UUID) ([]store.Tunnel, error) {
+	return nil, nil
+}
+func (f *fakeStore) UsageHistory(ctx context.Context, id uuid.UUID, days int) ([]store.DailyUsage, error) {
+	return nil, nil
+}
 
 type fakeLimits struct {
 	allowed bool
