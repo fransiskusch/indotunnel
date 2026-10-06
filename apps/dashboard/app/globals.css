@@ -1,46 +1,24 @@
 @import "tailwindcss";
 
 :root {
-  --background: 0 0% 100%;
-  --foreground: 240 10% 3.9%;
-  --card: 0 0% 100%;
-  --card-foreground: 240 10% 3.9%;
-  --primary: 240 5.9% 10%;
-  --primary-foreground: 0 0% 98%;
-  --secondary: 240 4.8% 95.9%;
-  --secondary-foreground: 240 5.9% 10%;
-  --muted: 240 4.8% 95.9%;
-  --muted-foreground: 240 3.8% 46.1%;
-  --accent: 240 4.8% 95.9%;
-  --accent-foreground: 240 5.9% 10%;
+  --background: 222 47% 5%;
+  --foreground: 210 40% 98%;
+  --card: 222 47% 7%;
+  --card-foreground: 210 40% 98%;
+  --primary: 160 84% 39%;
+  --primary-foreground: 222 47% 5%;
+  --secondary: 217 33% 15%;
+  --secondary-foreground: 210 40% 98%;
+  --muted: 217 33% 13%;
+  --muted-foreground: 215 20.2% 65.1%;
+  --accent: 187 92% 41%;
+  --accent-foreground: 210 40% 98%;
   --destructive: 0 84.2% 60.2%;
-  --destructive-foreground: 0 0% 98%;
-  --border: 240 5.9% 90%;
-  --input: 240 5.9% 90%;
-  --ring: 240 5.9% 10%;
+  --destructive-foreground: 210 40% 98%;
+  --border: 217 33% 16%;
+  --input: 217 33% 16%;
+  --ring: 160 84% 39%;
   --radius: 0.5rem;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: 240 10% 3.9%;
-    --foreground: 0 0% 98%;
-    --card: 240 10% 3.9%;
-    --card-foreground: 0 0% 98%;
-    --primary: 0 0% 98%;
-    --primary-foreground: 240 5.9% 10%;
-    --secondary: 240 3.7% 15.9%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 240 3.7% 15.9%;
-    --muted-foreground: 240 5% 64.9%;
-    --accent: 240 3.7% 15.9%;
-    --accent-foreground: 0 0% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 240 3.7% 15.9%;
-    --input: 240 3.7% 15.9%;
-    --ring: 240 4.9% 83.9%;
-  }
 }
 
 @theme inline {
@@ -65,6 +43,38 @@
 }
 
 body {
-  background: hsl(var(--background));
-  color: hsl(var(--foreground));
+  background-color: #080c14;
+  color: #f1f5f9;
+  font-feature-settings: "rlig" 1, "calt" 1;
+}
+
+/* DevTool custom glowing effects & terminal styling */
+.glow-emerald {
+  box-shadow: 0 0 35px -5px rgba(16, 185, 129, 0.25);
+}
+
+.glow-cyan {
+  box-shadow: 0 0 35px -5px rgba(6, 182, 212, 0.25);
+}
+
+.bg-grid-pattern {
+  background-size: 32px 32px;
+  background-image: 
+    linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #080c14;
+}
+::-webkit-scrollbar-thumb {
+  background: #1e293b;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #334155;
 }
