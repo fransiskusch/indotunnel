@@ -3,11 +3,17 @@
 package main
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
+	"net/http"
 	"os"
+	"os/exec"
 	"os/signal"
+	"runtime"
 	"syscall"
 	"time"
 
@@ -48,16 +54,125 @@ func main() {
 	}
 }
 
-// login stores an API key so later runs need no environment variables.
-func login(args []string) error {
-	if len(args) == 0 || args[0] == "" {
-		return errors.New("usage: indotunnel login <api-key>")
+type deviceCodeResp struct {
+	DeviceCode        string `json:"device_code"`
+	UserCode          string `json:"user_code"`
+	VerificationURI   string `json:"verification_uri"`
+	VerifyURIComplete string `json:"verification_uri_complete"`
+	ExpiresIn         int    `json:"expires_in"`
+	Interval          int    `json:"interval"`
+}
+
+type deviceTokenResp struct {
+	Status string `json:"status"`
+	APIKey string `json:"api_key"`
+	Error  *struct {
+		Code    string `json:"code"`
+		Message string `json:"message"`
+	} `json:"error"`
+}
+
+func openBrowser(url string) error {
+	switch runtime.GOOS {
+	case "windows":
+		return exec.Command("rundll32", "url.dll,FileProtocolHandler", url).Start()
+	case "darwin":
+		return exec.Command("open", url).Start()
+	default:
+		return exec.Command("xdg-open", url).Start()
 	}
-	if err := cfg.Save(cfg.Credentials{Token: args[0]}); err != nil {
+}
+
+func performDeviceLogin(ctx context.Context, apiBase, clientName string, opener func(string) error, out io.Writer) error {
+	reqBody, _ := json.Marshal(map[string]string{"client_name": clientName})
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, apiBase+"/v1/auth/device/code", bytes.NewReader(reqBody))
+	if err != nil {
 		return err
 	}
-	fmt.Println("Logged in. API key saved.")
-	return nil
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return fmt.Errorf("could not connect to API: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("failed to initiate device login: HTTP %d", resp.StatusCode)
+	}
+
+	var codeResp deviceCodeResp
+	if err := json.NewDecoder(resp.Body).Decode(&codeResp); err != nil {
+		return fmt.Errorf("failed to parse code response: %w", err)
+	}
+
+	fmt.Fprintf(out, "\nTo authenticate, please visit:\n  %s\n\n", codeResp.VerifyURIComplete)
+	fmt.Fprintf(out, "Confirmation code: %s\n\n", codeResp.UserCode)
+	fmt.Fprintln(out, "Waiting for approval in browser...")
+
+	if opener != nil {
+		_ = opener(codeResp.VerifyURIComplete)
+	}
+
+	interval := time.Duration(codeResp.Interval) * time.Second
+	if interval <= 0 {
+		interval = 2 * time.Second
+	}
+
+	ticker := time.NewTicker(interval)
+	defer ticker.Stop()
+
+	for {
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		case <-ticker.C:
+			tokenReqBody, _ := json.Marshal(map[string]string{"device_code": codeResp.DeviceCode})
+			tReq, err := http.NewRequestWithContext(ctx, http.MethodPost, apiBase+"/v1/auth/device/token", bytes.NewReader(tokenReqBody))
+			if err != nil {
+				return err
+			}
+			tReq.Header.Set("Content-Type", "application/json")
+
+			tResp, err := http.DefaultClient.Do(tReq)
+			if err != nil {
+				continue // network glitch during polling, retry
+			}
+
+			var tokResp deviceTokenResp
+			_ = json.NewDecoder(tResp.Body).Decode(&tokResp)
+			tResp.Body.Close()
+
+			if tokResp.Status == "approved" && tokResp.APIKey != "" {
+				if err := cfg.Save(cfg.Credentials{Token: tokResp.APIKey}); err != nil {
+					return fmt.Errorf("could not save credentials: %w", err)
+				}
+				fmt.Fprintln(out, "Logged in. API key saved.")
+				return nil
+			}
+
+			if tResp.StatusCode == http.StatusBadRequest || (tokResp.Error != nil && tokResp.Error.Code == "EXPIRED_TOKEN") {
+				return errors.New("authorization expired. Please run 'indotunnel login' again")
+			}
+		}
+	}
+}
+
+// login stores an API key so later runs need no environment variables.
+func login(args []string) error {
+	if len(args) > 0 && args[0] != "" {
+		if err := cfg.Save(cfg.Credentials{Token: args[0]}); err != nil {
+			return err
+		}
+		fmt.Println("Logged in. API key saved.")
+		return nil
+	}
+	apiBase := os.Getenv("INDOTUNNEL_API")
+	if apiBase == "" {
+		apiBase = "http://localhost:8081"
+	}
+	host, _ := os.Hostname()
+	return performDeviceLogin(context.Background(), apiBase, host, openBrowser, os.Stdout)
 }
 
 func usage() {
@@ -66,12 +181,13 @@ func usage() {
 Usage:
   indotunnel <port>              e.g. indotunnel 3000
   indotunnel <host>:<port>       e.g. indotunnel 127.0.0.1:3000
-  indotunnel login <api-key>     save your API key
+  indotunnel login               log in interactively via browser
+  indotunnel login <api-key>     save your API key directly
   indotunnel --version
   indotunnel --help
 
-First time? Grab an API key from the dashboard, then:
-  indotunnel login <api-key>
+First time? Run:
+  indotunnel login
   indotunnel 3000
 
 Environment:
