@@ -169,7 +169,7 @@ func login(args []string) error {
 	}
 	apiBase := os.Getenv("INDOTUNNEL_API")
 	if apiBase == "" {
-		apiBase = "http://localhost:8081"
+		apiBase = "https://indotunnel.my.id/api"
 	}
 	host, _ := os.Hostname()
 	return performDeviceLogin(context.Background(), apiBase, host, openBrowser, os.Stdout)
@@ -192,8 +192,8 @@ First time? Run:
 
 Environment:
   INDOTUNNEL_TOKEN   API key (else read from the config file)
-  INDOTUNNEL_API     Control API base URL (default http://localhost:8081)
-  INDOTUNNEL_TUNNEL  Tunnel address (default localhost:7000)
+  INDOTUNNEL_API     Control API base URL (default https://indotunnel.my.id/api)
+  INDOTUNNEL_TUNNEL  Tunnel address (default indotunnel.my.id:7000)
 `)
 }
 
@@ -207,8 +207,8 @@ func run(args []string) error {
 		return err
 	}
 
-	apiBase := env("INDOTUNNEL_API", "http://localhost:8081")
-	tunnelAddr := env("INDOTUNNEL_TUNNEL", "localhost:7000")
+	apiBase := env("INDOTUNNEL_API", "https://indotunnel.my.id/api")
+	tunnelAddr := env("INDOTUNNEL_TUNNEL", "indotunnel.my.id:7000")
 
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer stop()
