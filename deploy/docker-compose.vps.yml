@@ -7,7 +7,7 @@ services:
     container_name: indotunnel-server
     restart: unless-stopped
     environment:
-      DATABASE_URL: postgres://admin:postgres_password@postgres:5432/indotunnel
+      DATABASE_URL: postgres://indotunnel:indotunnel_secure_pass_2026@postgres:5432/indotunnel
       REDIS_URL: redis://redis:6379/0
       EDGE_ADDR: ":8080"
       API_ADDR: ":8081"
@@ -19,11 +19,6 @@ services:
       API_BASE_URL: http://server:8081
     ports:
       - "127.0.0.1:7000:7000"
-    depends_on:
-      postgres:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
     networks:
       - monitoring
 
