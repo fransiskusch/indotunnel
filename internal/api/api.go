@@ -27,6 +27,9 @@ type Store interface {
 	RequestByID(ctx context.Context, requestID string) (store.RequestLog, error)
 	TunnelsByUser(ctx context.Context, userID uuid.UUID) ([]store.Tunnel, error)
 	UsageHistory(ctx context.Context, userID uuid.UUID, days int) ([]store.DailyUsage, error)
+	CreateAPIKey(ctx context.Context, userID uuid.UUID, name string) (string, store.APIKey, error)
+	ListAPIKeys(ctx context.Context, userID uuid.UUID) ([]store.APIKey, error)
+	RevokeAPIKey(ctx context.Context, userID, keyID uuid.UUID) error
 }
 
 // Limiter is the quota surface the API needs.
@@ -118,6 +121,8 @@ func isSessionPath(r *http.Request) bool {
 	case p == "/v1/auth/logout", p == "/v1/auth/me", p == "/v1/events",
 		p == "/v1/usage/today", p == "/v1/usage/month", p == "/v1/usage/history":
 		return true
+	case p == "/v1/api-keys" || strings.HasPrefix(p, "/v1/api-keys/"):
+		return true
 	case p == "/v1/tunnels":
 		return r.Method == http.MethodGet
 	case strings.HasPrefix(p, "/v1/tunnels/"):
@@ -146,6 +151,9 @@ func (s *Server) sessionRoutes() {
 	s.sessionMux.HandleFunc("GET /v1/usage/today", s.handleUsageToday)
 	s.sessionMux.HandleFunc("GET /v1/usage/month", s.handleUsageMonth)
 	s.sessionMux.HandleFunc("GET /v1/usage/history", s.handleUsageHistory)
+	s.sessionMux.HandleFunc("GET /v1/api-keys", s.handleListAPIKeys)
+	s.sessionMux.HandleFunc("POST /v1/api-keys", s.handleCreateAPIKey)
+	s.sessionMux.HandleFunc("DELETE /v1/api-keys/{id}", s.handleRevokeAPIKey)
 }
 
 // routes registers every control-plane endpoint on the internal mux.

@@ -83,6 +83,15 @@ func (f *fakeStore) TunnelsByUser(ctx context.Context, id uuid.UUID) ([]store.Tu
 func (f *fakeStore) UsageHistory(ctx context.Context, id uuid.UUID, days int) ([]store.DailyUsage, error) {
 	return nil, nil
 }
+func (f *fakeStore) CreateAPIKey(ctx context.Context, userID uuid.UUID, name string) (string, store.APIKey, error) {
+	return "", store.APIKey{}, nil
+}
+func (f *fakeStore) ListAPIKeys(ctx context.Context, userID uuid.UUID) ([]store.APIKey, error) {
+	return nil, nil
+}
+func (f *fakeStore) RevokeAPIKey(ctx context.Context, userID, keyID uuid.UUID) error {
+	return nil
+}
 
 type fakeLimits struct {
 	allowed bool
