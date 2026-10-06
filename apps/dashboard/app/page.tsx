@@ -268,11 +268,11 @@ export default function LandingPage() {
                 <div className="space-y-4">
                   <div className="flex justify-between items-center">
                     <span className="text-base font-bold text-white">Free</span>
-                    <span className="text-xs font-mono text-zinc-400 bg-zinc-800 px-2 py-0.5 rounded">Hobby</span>
+                    <span className="text-xs font-mono text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">No Expiry</span>
                   </div>
                   <div className="flex items-baseline gap-1">
                     <span className="text-3xl font-extrabold text-white">$0</span>
-                    <span className="text-xs text-zinc-400">/ forever</span>
+                    <span className="text-xs text-zinc-400">/ until I don&apos;t know</span>
                   </div>
                   <p className="text-xs text-zinc-400">Perfect for quick local testing and basic webhooks.</p>
                   <ul className="space-y-2.5 text-xs text-zinc-300 pt-2 border-t border-zinc-800">
@@ -288,8 +288,13 @@ export default function LandingPage() {
                       <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0" />
                       Random HTTP subdomains
                     </li>
-                    <li className="flex items-center gap-2 text-zinc-500">
+                    <li className="flex items-center gap-2">
+                      <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0" />
                       HTTP Request Inspector (1 hour log history)
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0" />
+                      No credit card, no expiry, no catch
                     </li>
                   </ul>
                 </div>
