@@ -8,5 +8,11 @@
 # release artifacts
 /dist/
 
+# local agent tool config
+.claude/
+.codex/
+.cursor/
+.grok/
+
 # local
 .env
