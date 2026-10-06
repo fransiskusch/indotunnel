@@ -36,7 +36,7 @@ func Load() (Credentials, error) {
 	}
 	b, err := os.ReadFile(p)
 	if err != nil {
-		return Credentials{}, fmt.Errorf("no token: set INDOTUNNEL_TOKEN or run scripts/seed.sh")
+		return Credentials{}, fmt.Errorf("not logged in\n\n  Get your API key from the dashboard, then run:\n    indotunnel login\n\n  Or set it for one session:\n    set INDOTUNNEL_TOKEN=<your-key>")
 	}
 	var c Credentials
 	if err := json.Unmarshal(b, &c); err != nil {

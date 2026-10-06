@@ -1,0 +1,8 @@
+# Downloaded native binary and version marker (fetched at install/run time)
+bin/indotunnel
+bin/indotunnel.exe
+bin/.version
+
+# npm
+node_modules
+*.tgz

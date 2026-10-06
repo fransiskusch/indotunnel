@@ -21,7 +21,8 @@ import (
 	itunnel "indotunnel/internal/tunnel"
 )
 
-const version = "0.1.0"
+// version is set at build time via -ldflags "-X main.version=...".
+var version = "0.1.0"
 
 func main() {
 	args := os.Args[1:]
@@ -33,6 +34,12 @@ func main() {
 		case "--help", "-h":
 			usage()
 			return
+		case "login":
+			if err := login(args[1:]); err != nil {
+				fmt.Fprintln(os.Stderr, "error:", err)
+				os.Exit(1)
+			}
+			return
 		}
 	}
 	if err := run(args); err != nil {
@@ -41,14 +48,31 @@ func main() {
 	}
 }
 
+// login stores an API key so later runs need no environment variables.
+func login(args []string) error {
+	if len(args) == 0 || args[0] == "" {
+		return errors.New("usage: indotunnel login <api-key>")
+	}
+	if err := cfg.Save(cfg.Credentials{Token: args[0]}); err != nil {
+		return err
+	}
+	fmt.Println("Logged in. API key saved.")
+	return nil
+}
+
 func usage() {
 	fmt.Print(`IndoTunnel - expose localhost to the internet
 
 Usage:
   indotunnel <port>              e.g. indotunnel 3000
   indotunnel <host>:<port>       e.g. indotunnel 127.0.0.1:3000
+  indotunnel login <api-key>     save your API key
   indotunnel --version
   indotunnel --help
+
+First time? Grab an API key from the dashboard, then:
+  indotunnel login <api-key>
+  indotunnel 3000
 
 Environment:
   INDOTUNNEL_TOKEN   API key (else read from the config file)

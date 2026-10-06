@@ -1,0 +1,34 @@
+{
+  "name": "indotunnel",
+  "version": "0.1.0",
+  "description": "Expose your localhost to the internet. Instant public URLs for local dev servers.",
+  "keywords": [
+    "tunnel",
+    "localhost",
+    "ngrok",
+    "devtool",
+    "reverse-proxy",
+    "webhook"
+  ],
+  "homepage": "https://github.com/indotunnel/indotunnel",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/indotunnel/indotunnel.git"
+  },
+  "license": "MIT",
+  "bin": {
+    "indotunnel": "bin/indotunnel.js"
+  },
+  "files": [
+    "bin/",
+    "lib/",
+    "install.js",
+    "README.md"
+  ],
+  "scripts": {
+    "postinstall": "node install.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

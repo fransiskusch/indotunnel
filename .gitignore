@@ -5,5 +5,8 @@
 /bin/
 *.exe
 
+# release artifacts
+/dist/
+
 # local
 .env
