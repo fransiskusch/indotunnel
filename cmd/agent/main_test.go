@@ -23,7 +23,7 @@ func TestPerformDeviceLogin(t *testing.T) {
 
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
-		case "/v1/auth/device/code":
+		case "/auth/device/code":
 			json.NewEncoder(w).Encode(map[string]any{
 				"device_code":               "d-123",
 				"user_code":                 "TEST-1234",
@@ -32,7 +32,7 @@ func TestPerformDeviceLogin(t *testing.T) {
 				"expires_in":                60,
 				"interval":                  1,
 			})
-		case "/v1/auth/device/token":
+		case "/auth/device/token":
 			c := atomic.AddInt32(&pollCount, 1)
 			if c == 1 {
 				json.NewEncoder(w).Encode(map[string]any{
@@ -85,7 +85,7 @@ func TestPerformDeviceLogin(t *testing.T) {
 func TestPerformDeviceLoginExpired(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
-		case "/v1/auth/device/code":
+		case "/auth/device/code":
 			json.NewEncoder(w).Encode(map[string]any{
 				"device_code":               "d-expired",
 				"user_code":                 "EXPI-9999",
@@ -94,7 +94,7 @@ func TestPerformDeviceLoginExpired(t *testing.T) {
 				"expires_in":                60,
 				"interval":                  1,
 			})
-		case "/v1/auth/device/token":
+		case "/auth/device/token":
 			w.WriteHeader(http.StatusBadRequest)
 			json.NewEncoder(w).Encode(map[string]any{
 				"error": map[string]string{

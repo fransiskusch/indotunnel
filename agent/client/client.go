@@ -25,7 +25,7 @@ func CreateTunnel(ctx context.Context, apiBase, token, localHost string, port in
 		"local_port": port,
 		"protocol":   "http",
 	})
-	req, err := http.NewRequestWithContext(ctx, "POST", apiBase+"/v1/tunnels", bytes.NewReader(body))
+	req, err := http.NewRequestWithContext(ctx, "POST", apiBase+"/tunnels", bytes.NewReader(body))
 	if err != nil {
 		return TunnelResp{}, err
 	}

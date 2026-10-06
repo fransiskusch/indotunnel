@@ -85,7 +85,7 @@ func openBrowser(url string) error {
 
 func performDeviceLogin(ctx context.Context, apiBase, clientName string, opener func(string) error, out io.Writer) error {
 	reqBody, _ := json.Marshal(map[string]string{"client_name": clientName})
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, apiBase+"/v1/auth/device/code", bytes.NewReader(reqBody))
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, apiBase+"/auth/device/code", bytes.NewReader(reqBody))
 	if err != nil {
 		return err
 	}
@@ -128,7 +128,7 @@ func performDeviceLogin(ctx context.Context, apiBase, clientName string, opener 
 			return ctx.Err()
 		case <-ticker.C:
 			tokenReqBody, _ := json.Marshal(map[string]string{"device_code": codeResp.DeviceCode})
-			tReq, err := http.NewRequestWithContext(ctx, http.MethodPost, apiBase+"/v1/auth/device/token", bytes.NewReader(tokenReqBody))
+			tReq, err := http.NewRequestWithContext(ctx, http.MethodPost, apiBase+"/auth/device/token", bytes.NewReader(tokenReqBody))
 			if err != nil {
 				return err
 			}
