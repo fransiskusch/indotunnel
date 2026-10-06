@@ -89,7 +89,7 @@ export default function LandingPage() {
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-2">
               <div className="flex items-center gap-2 bg-zinc-900/90 border border-zinc-800 rounded-lg px-4 py-2.5 font-mono text-sm text-zinc-300 w-full sm:w-auto justify-between shadow-inner">
                 <span className="text-zinc-500">$</span>
-                <span className="text-emerald-400 font-semibold">indotunnel http 8080</span>
+                <span className="text-emerald-400 font-semibold">npx indotunnel 3000</span>
               </div>
               <Link
                 href="/signup"
@@ -128,12 +128,12 @@ export default function LandingPage() {
                 <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 font-mono font-bold">
                   01
                 </div>
-                <h4 className="text-lg font-semibold text-white">Install CLI</h4>
+                <h4 className="text-lg font-semibold text-white">Run via NPX or CLI</h4>
                 <p className="text-xs text-zinc-400 leading-relaxed">
-                  Download IndoTunnel CLI binary for macOS, Linux, or Windows with one command.
+                  No installation required with NPX, or install globally via npm or binary.
                 </p>
                 <div className="bg-zinc-950 p-3 rounded-lg border border-zinc-800/80 font-mono text-xs text-zinc-300">
-                  <span className="text-emerald-400">npm</span> i -g indotunnel-cli
+                  <span className="text-emerald-400">npx</span> indotunnel 3000
                 </div>
               </div>
 
@@ -142,12 +142,12 @@ export default function LandingPage() {
                 <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 font-mono font-bold">
                   02
                 </div>
-                <h4 className="text-lg font-semibold text-white">Start Tunnel</h4>
+                <h4 className="text-lg font-semibold text-white">Instant Public URL</h4>
                 <p className="text-xs text-zinc-400 leading-relaxed">
-                  Specify your local server port to get a secure SSL endpoint immediately.
+                  Get a secure HTTPS public URL forwarded directly to your local server.
                 </p>
                 <div className="bg-zinc-950 p-3 rounded-lg border border-zinc-800/80 font-mono text-xs text-zinc-300">
-                  <span className="text-cyan-400">indotunnel</span> http 3000
+                  Public ➔ <span className="text-cyan-400">https://*.indotunnel.id</span>
                 </div>
               </div>
 
@@ -158,10 +158,10 @@ export default function LandingPage() {
                 </div>
                 <h4 className="text-lg font-semibold text-white">Inspect & Replay</h4>
                 <p className="text-xs text-zinc-400 leading-relaxed">
-                  Open the web dashboard to inspect headers, payloads, and replay webhooks.
+                  Open the web dashboard to inspect live traffic, headers, and replay webhooks.
                 </p>
                 <div className="bg-zinc-950 p-3 rounded-lg border border-zinc-800/80 font-mono text-xs text-zinc-300">
-                  Dashboard ➔ <span className="text-purple-400">localhost:4040</span>
+                  Dashboard ➔ <span className="text-purple-400">/dashboard</span>
                 </div>
               </div>
             </div>
@@ -272,9 +272,9 @@ export default function LandingPage() {
                   </div>
                   <div className="flex items-baseline gap-1">
                     <span className="text-3xl font-extrabold text-white">$0</span>
-                    <span className="text-xs text-zinc-400">/ until I don&apos;t know</span>
+                    <span className="text-xs text-zinc-400">/ forever free</span>
                   </div>
-                  <p className="text-xs text-zinc-400">Perfect for quick local testing and basic webhooks.</p>
+                  <p className="text-xs text-zinc-400">Perfect for quick local testing and webhook debugging.</p>
                   <ul className="space-y-2.5 text-xs text-zinc-300 pt-2 border-t border-zinc-800">
                     <li className="flex items-center gap-2">
                       <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0" />
@@ -282,19 +282,23 @@ export default function LandingPage() {
                     </li>
                     <li className="flex items-center gap-2">
                       <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0" />
-                      1,000 Requests / day
+                      5,000 Requests / day
                     </li>
                     <li className="flex items-center gap-2">
                       <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0" />
-                      Random HTTP subdomains
+                      10 GB Bandwidth / month
                     </li>
                     <li className="flex items-center gap-2">
                       <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0" />
-                      HTTP Request Inspector (1 hour log history)
+                      Random HTTPS subdomains
                     </li>
                     <li className="flex items-center gap-2">
                       <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0" />
-                      No credit card, no expiry, no catch
+                      Live HTTP Inspector & Webhook Replay
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0" />
+                      No credit card required
                     </li>
                   </ul>
                 </div>
