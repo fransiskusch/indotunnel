@@ -5,12 +5,13 @@ import { usePathname, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { logout } from "@/lib/api";
-import { Terminal, BarChart3, Activity } from "lucide-react";
+import { Terminal, BarChart3, Activity, Key } from "lucide-react";
 
 const links = [
   { href: "/dashboard", label: "Dashboard", icon: Activity },
   { href: "/requests", label: "Requests", icon: Terminal },
   { href: "/usage", label: "Usage", icon: BarChart3 },
+  { href: "/settings", label: "Settings", icon: Key },
 ];
 
 export function Nav() {

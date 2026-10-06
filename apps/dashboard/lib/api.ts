@@ -44,6 +44,24 @@ export type DailyUsage = {
   bytes_out: number;
 };
 
+export type APIKey = {
+  id: string;
+  user_id: string;
+  name: string;
+  key_prefix: string;
+  status: string;
+  last_used_at?: string;
+  created_at: string;
+};
+
+export type CreatedAPIKey = {
+  id: string;
+  name: string;
+  key_prefix: string;
+  key: string;
+  created_at: string;
+};
+
 export type UsageToday = { used: number; limit: number };
 export type UsageMonth = { bytes: number; limit: number };
 
@@ -140,4 +158,28 @@ export function listRequests(tunnelId: string, limit = 100) {
 
 export function getRequest(tunnelId: string, requestId: string) {
   return clientFetch<RequestLog>(`/tunnels/${tunnelId}/requests/${requestId}`);
+}
+
+export function listAPIKeys() {
+  return clientFetch<{ api_keys: APIKey[] }>("/api-keys");
+}
+
+export function createAPIKey(name: string) {
+  return clientFetch<CreatedAPIKey>("/api-keys", {
+    method: "POST",
+    body: JSON.stringify({ name }),
+  });
+}
+
+export function revokeAPIKey(id: string) {
+  return clientFetch<void>(`/api-keys/${id}`, {
+    method: "DELETE",
+  });
+}
+
+export function verifyDeviceCode(userCode: string) {
+  return clientFetch<{ status: string }>("/auth/device/verify", {
+    method: "POST",
+    body: JSON.stringify({ user_code: userCode }),
+  });
 }
