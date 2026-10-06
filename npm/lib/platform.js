@@ -18,7 +18,7 @@ function target(platform = process.platform, arch = process.arch) {
   if (!name) {
     throw new Error(
       `Unsupported platform: ${platform}-${arch}.\n` +
-        `Install from source instead: go install github.com/indotunnel/indotunnel/cmd/agent@latest`
+        `Install from source instead: go install github.com/fransiskusch/indotunnel/cmd/agent@latest`
     );
   }
   return { key, name, isWindows: platform === "win32" };
@@ -26,7 +26,7 @@ function target(platform = process.platform, arch = process.arch) {
 
 // Repo hosting the GitHub Releases. Override with INDOTUNNEL_REPO for forks.
 function repo() {
-  return process.env.INDOTUNNEL_REPO || "indotunnel/indotunnel";
+  return process.env.INDOTUNNEL_REPO || "fransiskusch/indotunnel";
 }
 
 function downloadURL(version, asset) {

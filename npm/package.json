@@ -10,10 +10,10 @@
     "reverse-proxy",
     "webhook"
   ],
-  "homepage": "https://github.com/indotunnel/indotunnel",
+  "homepage": "https://github.com/fransiskusch/indotunnel",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/indotunnel/indotunnel.git"
+    "url": "git+https://github.com/fransiskusch/indotunnel.git"
   },
   "license": "MIT",
   "bin": {

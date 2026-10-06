@@ -55,7 +55,7 @@ Get an API key from your dashboard, then `indotunnel login <api-key>`.
 On anything else, install from source:
 
 ```bash
-go install github.com/indotunnel/indotunnel/cmd/agent@latest
+go install github.com/fransiskusch/indotunnel/cmd/agent@latest
 ```
 
 ## License
