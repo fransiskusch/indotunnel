@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"net"
 	"net/http"
 	"strconv"
 	"strings"
@@ -127,20 +126,7 @@ func (s *Server) handleCreateTunnel(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) publicURL(sub string) string {
-	scheme := s.deps.Cfg.PublicScheme
-	host := sub + "." + s.deps.Cfg.PublicHostSuffix
-	if port := portOf(s.deps.Cfg.EdgeAddr); port != "" && port != "80" && port != "443" {
-		return scheme + "://" + host + ":" + port
-	}
-	return scheme + "://" + host
-}
-
-func portOf(addr string) string {
-	_, port, err := net.SplitHostPort(addr)
-	if err != nil {
-		return ""
-	}
-	return port
+	return s.deps.Cfg.PublicURL(sub)
 }
 
 func (s *Server) handleGetTunnel(w http.ResponseWriter, r *http.Request) {

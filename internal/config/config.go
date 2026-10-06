@@ -15,6 +15,7 @@ type Config struct {
 	TunnelAddr              string
 	PublicHostSuffix        string
 	PublicScheme            string
+	PublicPort              string
 	APIBaseURL              string
 	ClientIPHashSalt        string
 	DashboardOrigin         string
@@ -74,6 +75,7 @@ func Load() (Config, error) {
 		TunnelAddr:              env("TUNNEL_ADDR", ":7000"),
 		PublicHostSuffix:        env("PUBLIC_HOST_SUFFIX", "indotunnel.localhost"),
 		PublicScheme:            env("PUBLIC_SCHEME", "http"),
+		PublicPort:              env("PUBLIC_PORT", ""),
 		APIBaseURL:              env("API_BASE_URL", "http://localhost:8081"),
 		ClientIPHashSalt:        env("CLIENT_IP_HASH_SALT", "change-me"),
 		DashboardOrigin:         env("DASHBOARD_ORIGIN", "http://localhost:3000"),
@@ -83,4 +85,15 @@ func Load() (Config, error) {
 		BcryptCost:              bcryptCost,
 		LoginRateLimit:          loginRate,
 	}, nil
+}
+
+// PublicURL returns the public URL advertised to users for a subdomain. The
+// port is included only when PUBLIC_PORT is set: production is served by nginx
+// on 443 (bare host), while local dev exposes the edge directly on :8080.
+func (c Config) PublicURL(subdomain string) string {
+	host := subdomain + "." + c.PublicHostSuffix
+	if c.PublicPort != "" {
+		return c.PublicScheme + "://" + host + ":" + c.PublicPort
+	}
+	return c.PublicScheme + "://" + host
 }

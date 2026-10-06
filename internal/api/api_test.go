@@ -132,6 +132,7 @@ func newTestAPI(st *fakeStore, lim Limiter, lock *fakeLocker) *Server {
 	cfg := config.Config{
 		PublicScheme:     "http",
 		PublicHostSuffix: "indotunnel.localhost",
+		PublicPort:       "8080",
 		EdgeAddr:         ":8080",
 	}
 	return New(Deps{Store: st, Limits: lim, Lock: lock, Cfg: cfg})
@@ -166,8 +167,32 @@ func TestCreateTunnelSuccess(t *testing.T) {
 	if !strings.Contains(resp.PublicURL, resp.Subdomain+".indotunnel.localhost") {
 		t.Fatalf("public_url=%q", resp.PublicURL)
 	}
+	if resp.PublicURL != "http://"+resp.Subdomain+".indotunnel.localhost:8080" {
+		t.Fatalf("public_url=%q, want port from PUBLIC_PORT", resp.PublicURL)
+	}
 	if resp.Status != "pending" {
 		t.Fatalf("status=%q", resp.Status)
+	}
+}
+
+// TestCreateTunnelPublicURLNoPort guards production behavior: with no
+// PUBLIC_PORT configured, the advertised URL must be a bare host (nginx
+// terminates 443) so users never hit an unreachable :8080.
+func TestCreateTunnelPublicURLNoPort(t *testing.T) {
+	st := &fakeStore{}
+	srv := New(Deps{Store: st, Limits: &fakeLimits{}, Lock: &fakeLocker{ok: true},
+		Cfg: config.Config{PublicScheme: "https", PublicHostSuffix: "indotunnel.my.id"}})
+	rec := doAuthed(srv, "POST", "/v1/tunnels", `{"local_host":"127.0.0.1","local_port":3000,"protocol":"http"}`)
+	if rec.Code != 201 {
+		t.Fatalf("code=%d body=%s", rec.Code, rec.Body.String())
+	}
+	var resp struct {
+		Subdomain string `json:"subdomain"`
+		PublicURL string `json:"public_url"`
+	}
+	_ = json.Unmarshal(rec.Body.Bytes(), &resp)
+	if resp.PublicURL != "https://"+resp.Subdomain+".indotunnel.my.id" {
+		t.Fatalf("public_url=%q, want no port", resp.PublicURL)
 	}
 }
 

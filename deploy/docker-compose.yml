@@ -37,6 +37,7 @@ services:
       TUNNEL_ADDR: ":7000"
       PUBLIC_HOST_SUFFIX: indotunnel.localhost
       PUBLIC_SCHEME: http
+      PUBLIC_PORT: "8080"
       CLIENT_IP_HASH_SALT: local-dev-salt
       DASHBOARD_ORIGIN: http://localhost:3000
       API_BASE_URL: http://server:8081

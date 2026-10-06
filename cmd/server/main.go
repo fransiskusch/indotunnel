@@ -108,9 +108,7 @@ func run(log *slog.Logger) error {
 	apiHTTP := &http.Server{Handler: apiSrv.Handler()}
 	edgeHTTP := &http.Server{Handler: gw}
 
-	publicURL := func(sub string) string {
-		return cfg.PublicScheme + "://" + sub + "." + cfg.PublicHostSuffix
-	}
+	publicURL := cfg.PublicURL
 
 	tunnelSrv := &tunnel.Server{
 		EdgeNode:  "local-1",
