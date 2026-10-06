@@ -18,7 +18,9 @@ services:
       DASHBOARD_ORIGIN: https://indotunnel.my.id
       API_BASE_URL: http://server:8081
     ports:
-      - "127.0.0.1:7000:7000"
+      - "0.0.0.0:7000:7000"
+      - "127.0.0.1:8081:8081"
+      - "127.0.0.1:18080:8080"
     networks:
       - monitoring
 
@@ -35,6 +37,8 @@ services:
       API_BASE_URL: http://server:8081
     depends_on:
       - server
+    ports:
+      - "127.0.0.1:3000:3000"
     networks:
       - monitoring
 
