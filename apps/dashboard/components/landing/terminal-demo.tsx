@@ -41,7 +41,7 @@ export function TerminalDemo() {
   }
 
   function copyInstall() {
-    navigator.clipboard.writeText("indotunnel http 8080");
+    navigator.clipboard.writeText("npx indotunnel 3000");
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   }
@@ -90,7 +90,7 @@ export function TerminalDemo() {
             <div className="flex items-center justify-between bg-zinc-900/40 p-3 rounded-lg border border-zinc-800/50">
               <div className="flex items-center gap-2 text-zinc-300">
                 <span className="text-emerald-400">$</span>
-                <span className="text-white font-semibold">indotunnel http 8080</span>
+                <span className="text-white font-semibold">npx indotunnel 3000</span>
               </div>
               <button
                 onClick={copyInstall}
@@ -111,7 +111,7 @@ export function TerminalDemo() {
             <div className="space-y-2 text-xs text-zinc-300 border-l-2 border-emerald-500/40 pl-3">
               <p className="text-emerald-400 font-semibold flex items-center gap-2">
                 <Radio className="h-3.5 w-3.5 animate-pulse text-emerald-400" />
-                STATUS: ONLINE (Connected to sgp-1.gateway.indotunnel.com)
+                STATUS: ONLINE (Connected to id-cgk.gateway.indotunnel.id)
               </p>
               <p className="text-zinc-400">
                 Forwarding:{" "}
@@ -120,11 +120,11 @@ export function TerminalDemo() {
                   onClick={(e) => e.preventDefault()}
                   className="text-cyan-400 underline font-semibold hover:text-cyan-300"
                 >
-                  https://app-dev.indotunnel.com
+                  https://a8f2x.indotunnel.id
                 </a>{" "}
-                ➔ <span className="text-white font-mono">http://localhost:8080</span>
+                ➔ <span className="text-white font-mono">http://localhost:3000</span>
               </p>
-              <p className="text-zinc-400">Latency: 14ms | Protocol: HTTP/2 TLS 1.3</p>
+              <p className="text-zinc-400">Latency: 12ms | Protocol: HTTP/2 TLS 1.3</p>
             </div>
 
             <div className="mt-4 pt-4 border-t border-zinc-900 space-y-2">
