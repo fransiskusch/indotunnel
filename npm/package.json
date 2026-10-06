@@ -1,6 +1,6 @@
 {
   "name": "indotunnel",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Expose your localhost to the internet. Instant public URLs for local dev servers.",
   "keywords": [
     "tunnel",
