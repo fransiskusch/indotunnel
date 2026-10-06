@@ -1,0 +1,48 @@
+services:
+  server:
+    image: ghcr.io/fransiskusch/indotunnel-server:latest
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile.server
+    container_name: indotunnel-server
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgres://admin:postgres_password@postgres:5432/indotunnel
+      REDIS_URL: redis://redis:6379/0
+      EDGE_ADDR: ":8080"
+      API_ADDR: ":8081"
+      TUNNEL_ADDR: ":7000"
+      PUBLIC_HOST_SUFFIX: indotunnel.my.id
+      PUBLIC_SCHEME: https
+      CLIENT_IP_HASH_SALT: indotunnel_staging_salt_v1
+      DASHBOARD_ORIGIN: https://indotunnel.my.id
+      API_BASE_URL: http://server:8081
+    ports:
+      - "127.0.0.1:7000:7000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - monitoring
+
+  dashboard:
+    image: ghcr.io/fransiskusch/indotunnel-dashboard:latest
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile.dashboard
+      args:
+        API_BASE_URL: http://server:8081
+    container_name: indotunnel-dashboard
+    restart: unless-stopped
+    environment:
+      API_BASE_URL: http://server:8081
+    depends_on:
+      - server
+    networks:
+      - monitoring
+
+networks:
+  monitoring:
+    external: true
