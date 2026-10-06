@@ -86,6 +86,7 @@ func run(log *slog.Logger) error {
 		SessionStore: st,
 		RateLimiter:  checker,
 		Bus:          bus,
+		DeviceAuth:   redisclient.NewDeviceStore(rdb),
 	})
 
 	gw := gateway.New(cfg, registry, checker, logger)

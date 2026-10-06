@@ -56,6 +56,24 @@ type SessionStore interface {
 	UserByID(ctx context.Context, id uuid.UUID) (store.User, error)
 }
 
+// DeviceCodeState tracks ephemeral device authorization flow state.
+type DeviceCodeState struct {
+	DeviceCode string `json:"device_code"`
+	UserCode   string `json:"user_code"`
+	ClientName string `json:"client_name"`
+	Status     string `json:"status"` // "pending" | "approved"
+	APIKey     string `json:"api_key,omitempty"`
+}
+
+// DeviceAuthStore stores ephemeral state for the CLI device-authorization grant.
+type DeviceAuthStore interface {
+	SaveDeviceCode(ctx context.Context, state DeviceCodeState, ttl time.Duration) error
+	GetByUserCode(ctx context.Context, userCode string) (DeviceCodeState, error)
+	ApproveDeviceCode(ctx context.Context, userCode, apiKey string, ttl time.Duration) error
+	GetByDeviceCode(ctx context.Context, deviceCode string) (DeviceCodeState, error)
+	ConsumeDeviceCode(ctx context.Context, deviceCode string) error
+}
+
 // RateLimiter counts attempts against a key for a window.
 type RateLimiter interface {
 	Allow(ctx context.Context, key string, limit int, window time.Duration) (bool, error)
@@ -77,6 +95,7 @@ type Deps struct {
 	SessionStore SessionStore
 	RateLimiter  RateLimiter
 	Bus          events.Bus
+	DeviceAuth   DeviceAuthStore
 }
 
 // Server hosts the control-plane HTTP routes.
@@ -102,7 +121,8 @@ func (s *Server) Handler() http.Handler {
 	session := s.sessionHandler()
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
-		case "/healthz", "/readyz", "/v1/auth/signup", "/v1/auth/login":
+		case "/healthz", "/readyz", "/v1/auth/signup", "/v1/auth/login",
+			"/v1/auth/device/code", "/v1/auth/device/token":
 			s.mux.ServeHTTP(w, r)
 			return
 		}
@@ -119,7 +139,8 @@ func isSessionPath(r *http.Request) bool {
 	p := r.URL.Path
 	switch {
 	case p == "/v1/auth/logout", p == "/v1/auth/me", p == "/v1/events",
-		p == "/v1/usage/today", p == "/v1/usage/month", p == "/v1/usage/history":
+		p == "/v1/usage/today", p == "/v1/usage/month", p == "/v1/usage/history",
+		p == "/v1/auth/device/verify":
 		return true
 	case p == "/v1/api-keys" || strings.HasPrefix(p, "/v1/api-keys/"):
 		return true
@@ -154,6 +175,7 @@ func (s *Server) sessionRoutes() {
 	s.sessionMux.HandleFunc("GET /v1/api-keys", s.handleListAPIKeys)
 	s.sessionMux.HandleFunc("POST /v1/api-keys", s.handleCreateAPIKey)
 	s.sessionMux.HandleFunc("DELETE /v1/api-keys/{id}", s.handleRevokeAPIKey)
+	s.sessionMux.HandleFunc("POST /v1/auth/device/verify", s.handleDeviceVerify)
 }
 
 // routes registers every control-plane endpoint on the internal mux.
@@ -169,4 +191,6 @@ func (s *Server) routes() {
 	s.mux.HandleFunc("GET /v1/usage/month", s.handleUsageMonth)
 	s.mux.HandleFunc("POST /v1/auth/signup", s.handleSignup)
 	s.mux.HandleFunc("POST /v1/auth/login", s.handleLogin)
+	s.mux.HandleFunc("POST /v1/auth/device/code", s.handleDeviceCode)
+	s.mux.HandleFunc("POST /v1/auth/device/token", s.handleDeviceToken)
 }
