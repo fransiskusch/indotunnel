@@ -258,7 +258,7 @@ export default function LandingPage() {
                 Simple & Predictable Pricing
               </h3>
               <p className="text-zinc-400 text-sm">
-                Start with our generous free tier, upgrade as your team grows.
+                Free while we build. Paid tiers are coming, no launch date yet.
               </p>
             </div>
 
@@ -309,7 +309,7 @@ export default function LandingPage() {
               {/* Developer Plan (Featured) */}
               <div className="relative rounded-2xl border-2 border-emerald-500/80 bg-slate-900/80 p-6 flex flex-col justify-between space-y-6 glow-emerald">
                 <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-emerald-500 text-black font-mono text-[10px] font-extrabold tracking-wider uppercase px-3 py-0.5 rounded-full">
-                  Most Popular
+                  Coming Soon
                 </div>
                 <div className="space-y-4 pt-1">
                   <div className="flex justify-between items-center">
@@ -317,8 +317,7 @@ export default function LandingPage() {
                     <span className="text-xs font-mono text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">Pro Dev</span>
                   </div>
                   <div className="flex items-baseline gap-1">
-                    <span className="text-3xl font-extrabold text-white">$9</span>
-                    <span className="text-xs text-zinc-400">/ month</span>
+                    <span className="text-2xl font-extrabold text-zinc-500">Coming Soon</span>
                   </div>
                   <p className="text-xs text-zinc-400">For active developers & freelance API integrators.</p>
                   <ul className="space-y-2.5 text-xs text-zinc-200 pt-2 border-t border-zinc-800">
@@ -344,12 +343,13 @@ export default function LandingPage() {
                     </li>
                   </ul>
                 </div>
-                <Link
-                  href="/signup"
-                  className="w-full text-center py-2.5 rounded-lg bg-emerald-500 text-black font-bold text-xs hover:bg-emerald-400 transition-all shadow-[0_0_15px_rgba(16,185,129,0.3)]"
+                <button
+                  type="button"
+                  disabled
+                  className="w-full text-center py-2.5 rounded-lg bg-zinc-800/80 text-zinc-500 font-semibold text-xs cursor-not-allowed"
                 >
-                  Start 14-Day Free Trial
-                </Link>
+                  Coming Soon
+                </button>
               </div>
 
               {/* Team Plan */}
@@ -360,8 +360,7 @@ export default function LandingPage() {
                     <span className="text-xs font-mono text-cyan-400 bg-cyan-500/10 px-2 py-0.5 rounded border border-cyan-500/20">Organization</span>
                   </div>
                   <div className="flex items-baseline gap-1">
-                    <span className="text-3xl font-extrabold text-white">$29</span>
-                    <span className="text-xs text-zinc-400">/ month</span>
+                    <span className="text-2xl font-extrabold text-zinc-500">Coming Soon</span>
                   </div>
                   <p className="text-xs text-zinc-400">For engineering teams, custom CNAME domains & priority gateway.</p>
                   <ul className="space-y-2.5 text-xs text-zinc-300 pt-2 border-t border-zinc-800">
@@ -383,12 +382,13 @@ export default function LandingPage() {
                     </li>
                   </ul>
                 </div>
-                <Link
-                  href="/signup"
-                  className="w-full text-center py-2.5 rounded-lg border border-zinc-700 bg-zinc-800/80 text-white font-semibold text-xs hover:bg-zinc-700 transition-colors"
+                <button
+                  type="button"
+                  disabled
+                  className="w-full text-center py-2.5 rounded-lg bg-zinc-800/80 text-zinc-500 font-semibold text-xs cursor-not-allowed"
                 >
-                  Contact Sales
-                </Link>
+                  Coming Soon
+                </button>
               </div>
             </div>
           </div>
