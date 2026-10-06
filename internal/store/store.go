@@ -2,7 +2,11 @@ package store
 
 import (
 	"context"
+	"crypto/rand"
+	"crypto/sha256"
+	"encoding/hex"
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/google/uuid"
@@ -82,6 +86,88 @@ type RequestLog struct {
 	DurationMS    int
 	ClientIPHash  string
 	StartedAt     time.Time
+}
+
+// APIKey mirrors the api_keys table without the secret hash.
+type APIKey struct {
+	ID         uuid.UUID  `json:"id"`
+	UserID     uuid.UUID  `json:"user_id"`
+	Name       string     `json:"name"`
+	KeyPrefix  string     `json:"key_prefix"`
+	Status     string     `json:"status"`
+	LastUsedAt *time.Time `json:"last_used_at,omitempty"`
+	ExpiresAt  *time.Time `json:"expires_at,omitempty"`
+	CreatedAt  time.Time  `json:"created_at"`
+}
+
+// CreateAPIKey generates a new API key and stores its hash.
+func (s *Store) CreateAPIKey(ctx context.Context, userID uuid.UUID, name string) (string, APIKey, error) {
+	b := make([]byte, 32)
+	if _, err := rand.Read(b); err != nil {
+		return "", APIKey{}, fmt.Errorf("crypto/rand: %w", err)
+	}
+	raw := "sk_live_" + hex.EncodeToString(b)
+	prefix := raw[:12]
+	sum := sha256.Sum256([]byte(raw))
+	hash := hex.EncodeToString(sum[:])
+
+	id := uuid.New()
+	var k APIKey
+	err := s.pool.QueryRow(ctx, `
+		INSERT INTO api_keys (id, user_id, name, key_prefix, secret_hash, status)
+		VALUES ($1, $2, $3, $4, $5, 'active')
+		RETURNING id, user_id, name, key_prefix, status, last_used_at, expires_at, created_at`,
+		id, userID, name, prefix, hash,
+	).Scan(&k.ID, &k.UserID, &k.Name, &k.KeyPrefix, &k.Status, &k.LastUsedAt, &k.ExpiresAt, &k.CreatedAt)
+	if err != nil {
+		return "", APIKey{}, err
+	}
+	return raw, k, nil
+}
+
+// ListAPIKeys returns all API keys for a user, ordered by creation date descending.
+func (s *Store) ListAPIKeys(ctx context.Context, userID uuid.UUID) ([]APIKey, error) {
+	rows, err := s.pool.Query(ctx, `
+		SELECT id, user_id, name, key_prefix, status, last_used_at, expires_at, created_at
+		FROM api_keys
+		WHERE user_id = $1
+		ORDER BY created_at DESC`,
+		userID,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var keys []APIKey
+	for rows.Next() {
+		var k APIKey
+		if err := rows.Scan(&k.ID, &k.UserID, &k.Name, &k.KeyPrefix, &k.Status, &k.LastUsedAt, &k.ExpiresAt, &k.CreatedAt); err != nil {
+			return nil, err
+		}
+		keys = append(keys, k)
+	}
+	if keys == nil {
+		keys = []APIKey{}
+	}
+	return keys, rows.Err()
+}
+
+// RevokeAPIKey marks an active API key as revoked.
+func (s *Store) RevokeAPIKey(ctx context.Context, userID, keyID uuid.UUID) error {
+	tag, err := s.pool.Exec(ctx, `
+		UPDATE api_keys
+		SET status = 'revoked'
+		WHERE id = $1 AND user_id = $2`,
+		keyID, userID,
+	)
+	if err != nil {
+		return err
+	}
+	if tag.RowsAffected() == 0 {
+		return ErrNotFound
+	}
+	return nil
 }
 
 // UserByAPIKey resolves an active api key (matched on prefix + hash) to its user.
