@@ -185,7 +185,7 @@ export function TerminalDemo() {
             <div className="space-y-2">
               <div className="text-zinc-400">Headers:</div>
               <pre className="p-2.5 rounded bg-zinc-900 text-zinc-300 font-mono text-[11px] overflow-x-auto border border-zinc-800">
-{`Host: app-dev.indotunnel.com
+{`Host: a8f2x.indotunnel.id
 User-Agent: Stripe/1.0 (+https://stripe.com/docs/webhooks)
 Content-Type: application/json
 X-Stripe-Signature: t=169700,v1=9a8b7c6d5e4f...`}
