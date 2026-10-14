@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { TerminalDemo } from "@/components/landing/terminal-demo";
+import { SiteHeader } from "@/components/landing/site-header";
+import { SiteFooter } from "@/components/landing/site-footer";
 import {
-  Terminal,
   Zap,
   Globe,
   ShieldCheck,
@@ -21,52 +22,7 @@ export default function LandingPage() {
       <div className="fixed inset-0 bg-grid-pattern opacity-40 pointer-events-none" />
 
       {/* Header / Navbar */}
-      <header className="sticky top-0 z-50 border-b border-zinc-800/80 bg-slate-950/80 backdrop-blur-md">
-        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
-          <Link href="/" className="flex items-center gap-2.5 group">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 group-hover:border-emerald-400 transition-colors shadow-[0_0_15px_rgba(16,185,129,0.2)]">
-              <Terminal className="h-5 w-5" />
-            </div>
-            <span className="font-mono text-lg font-bold tracking-tight text-white flex items-center gap-2">
-              IndoTunnel
-              <span className="text-[10px] uppercase tracking-wider font-semibold px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                v1.0
-              </span>
-            </span>
-          </Link>
-
-          <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-zinc-400">
-            <a href="#features" className="hover:text-white transition-colors">
-              Features
-            </a>
-            <a href="#quickstart" className="hover:text-white transition-colors">
-              Quickstart
-            </a>
-            <a href="#ai" className="hover:text-white transition-colors">
-              AI
-            </a>
-            <a href="#pricing" className="hover:text-white transition-colors">
-              Pricing
-            </a>
-          </nav>
-
-          <div className="flex items-center gap-3">
-            <Link
-              href="/login"
-              className="text-sm font-medium text-zinc-300 hover:text-white px-3 py-1.5 transition-colors"
-            >
-              Sign In
-            </Link>
-            <Link
-              href="/dashboard"
-              className="flex items-center gap-1.5 rounded-lg bg-emerald-500 px-4 py-2 text-sm font-bold text-black hover:bg-emerald-400 transition-all shadow-[0_0_20px_rgba(16,185,129,0.3)] hover:shadow-[0_0_25px_rgba(16,185,129,0.5)]"
-            >
-              Dashboard
-              <ArrowRight className="h-4 w-4" />
-            </Link>
-          </div>
-        </div>
-      </header>
+      <SiteHeader />
 
       {/* Main Container */}
       <main className="relative z-10">
@@ -451,17 +407,7 @@ export default function LandingPage() {
         </section>
 
         {/* FOOTER */}
-        <footer className="border-t border-zinc-800/80 bg-slate-950 py-10">
-          <div className="mx-auto max-w-6xl px-4 sm:px-6 flex flex-col md:flex-row items-center justify-between gap-6">
-            <div className="flex items-center gap-2 text-zinc-400 text-xs font-mono">
-              <span className="h-2 w-2 rounded-full bg-emerald-400 animate-ping inline-block" />
-              <span className="text-zinc-200">IndoTunnel Gateways Operational</span>
-            </div>
-            <p className="text-xs text-zinc-500 font-mono">
-              © {new Date().getFullYear()} IndoTunnel Inc. All rights reserved.
-            </p>
-          </div>
-        </footer>
+        <SiteFooter />
       </main>
     </div>
   );
