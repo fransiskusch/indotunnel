@@ -21,3 +21,6 @@
 apps/dashboard/AGENTS.md
 apps/dashboard/CLAUDE.md
 .playwright-mcp/
+
+# stray build logs
+apps/dashboard/build_out*.txt
