@@ -2,6 +2,7 @@ import Link from "next/link";
 import { TerminalDemo } from "@/components/landing/terminal-demo";
 import { SiteHeader } from "@/components/landing/site-header";
 import { SiteFooter } from "@/components/landing/site-footer";
+import { Hero } from "@/components/landing/hero";
 import {
   Zap,
   Globe,
@@ -27,44 +28,7 @@ export default function LandingPage() {
       {/* Main Container */}
       <main className="relative z-10">
         {/* HERO SECTION */}
-        <section className="mx-auto max-w-6xl px-4 pt-16 pb-20 sm:px-6 lg:pt-24">
-          <div className="text-center space-y-6 max-w-3xl mx-auto">
-            <div className="inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3.5 py-1 text-xs font-mono font-medium text-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.15)]">
-              <Sparkles className="h-3.5 w-3.5" />
-              High-Performance Reverse Proxy & Localhost Gateway
-            </div>
-
-            <h1 className="text-4xl font-extrabold tracking-tight sm:text-6xl text-white">
-              Expose localhost to the internet{" "}
-              <span className="text-emerald-400 font-extrabold">
-                in seconds.
-              </span>
-            </h1>
-
-            <p className="text-base sm:text-lg text-zinc-400 max-w-2xl mx-auto leading-relaxed">
-              Instant public URLs, live HTTP request inspection, webhook replaying, and custom subdomains built for developer velocity.
-            </p>
-
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-2">
-              <div className="flex items-center gap-2 bg-zinc-900/90 border border-zinc-800 rounded-lg px-4 py-2.5 font-mono text-sm text-zinc-300 w-full sm:w-auto justify-between shadow-inner">
-                <span className="text-zinc-500">$</span>
-                <span className="text-emerald-400 font-semibold">npx indotunnel 3000</span>
-              </div>
-              <Link
-                href="/signup"
-                className="w-full sm:w-auto flex items-center justify-center gap-2 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-black px-6 py-2.5 text-sm font-bold transition-all shadow-[0_0_20px_rgba(16,185,129,0.3)]"
-              >
-                Get Started Free
-                <ArrowRight className="h-4 w-4" />
-              </Link>
-            </div>
-          </div>
-
-          {/* Interactive Terminal Demo */}
-          <div className="mt-14 max-w-4xl mx-auto">
-            <TerminalDemo />
-          </div>
-        </section>
+        <Hero />
 
         {/* 3-STEP QUICKSTART SECTION */}
         <section id="quickstart" className="border-t border-zinc-800/80 bg-slate-950/60 py-20">
