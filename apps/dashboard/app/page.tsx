@@ -4,6 +4,7 @@ import { SiteHeader } from "@/components/landing/site-header";
 import { SiteFooter } from "@/components/landing/site-footer";
 import { Hero } from "@/components/landing/hero";
 import { Quickstart } from "@/components/landing/quickstart";
+import { Features } from "@/components/landing/features";
 import {
   Zap,
   Globe,
@@ -35,83 +36,7 @@ export default function LandingPage() {
         <Quickstart />
 
         {/* FEATURES SHOWCASE */}
-        <section id="features" className="py-20 border-t border-zinc-800/80">
-          <div className="mx-auto max-w-6xl px-4 sm:px-6">
-            <div className="text-center max-w-2xl mx-auto mb-16 space-y-3">
-              <h2 className="text-xs font-mono font-semibold uppercase tracking-widest text-cyan-400">
-                Developer Ergonomics
-              </h2>
-              <h3 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">
-                Built for High-Speed Engineering
-              </h3>
-              <p className="text-zinc-400 text-sm">
-                Everything you need to test webhooks, show work to clients, and build APIs.
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="rounded-xl border border-zinc-800 bg-slate-900/40 p-6 space-y-3 hover:bg-slate-900/60 transition-colors">
-                <div className="h-9 w-9 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center border border-emerald-500/20">
-                  <Globe className="h-5 w-5" />
-                </div>
-                <h4 className="text-base font-semibold text-white">Instant Subdomains</h4>
-                <p className="text-xs text-zinc-400 leading-relaxed">
-                  Get deterministic custom subdomains or random subdomains with HTTPS automatic SSL certificates.
-                </p>
-              </div>
-
-              <div className="rounded-xl border border-zinc-800 bg-slate-900/40 p-6 space-y-3 hover:bg-slate-900/60 transition-colors">
-                <div className="h-9 w-9 rounded-lg bg-cyan-500/10 text-cyan-400 flex items-center justify-center border border-cyan-500/20">
-                  <RefreshCcw className="h-5 w-5" />
-                </div>
-                <h4 className="text-base font-semibold text-white">Webhook Replaying</h4>
-                <p className="text-xs text-zinc-400 leading-relaxed">
-                  Never trigger a Stripe or GitHub webhook twice. Replay saved requests with 1-click inside dashboard.
-                </p>
-              </div>
-
-              <div className="rounded-xl border border-zinc-800 bg-slate-900/40 p-6 space-y-3 hover:bg-slate-900/60 transition-colors">
-                <div className="h-9 w-9 rounded-lg bg-purple-500/10 text-purple-400 flex items-center justify-center border border-purple-500/20">
-                  <Zap className="h-5 w-5" />
-                </div>
-                <h4 className="text-base font-semibold text-white">Ultra Low Latency</h4>
-                <p className="text-xs text-zinc-400 leading-relaxed">
-                  Powered by Go & Redis gateway nodes in Southeast Asia for minimal round-trip latency.
-                </p>
-              </div>
-
-              <div className="rounded-xl border border-zinc-800 bg-slate-900/40 p-6 space-y-3 hover:bg-slate-900/60 transition-colors">
-                <div className="h-9 w-9 rounded-lg bg-amber-500/10 text-amber-400 flex items-center justify-center border border-amber-500/20">
-                  <ShieldCheck className="h-5 w-5" />
-                </div>
-                <h4 className="text-base font-semibold text-white">Token Authorization</h4>
-                <p className="text-xs text-zinc-400 leading-relaxed">
-                  Protect your public endpoints with HTTP Basic Auth, IP Whitelisting, or Bearer auth tokens.
-                </p>
-              </div>
-
-              <div className="rounded-xl border border-zinc-800 bg-slate-900/40 p-6 space-y-3 hover:bg-slate-900/60 transition-colors">
-                <div className="h-9 w-9 rounded-lg bg-blue-500/10 text-blue-400 flex items-center justify-center border border-blue-500/20">
-                  <Code2 className="h-5 w-5" />
-                </div>
-                <h4 className="text-base font-semibold text-white">Traffic Metrics & Logs</h4>
-                <p className="text-xs text-zinc-400 leading-relaxed">
-                  Track request throughput, latency histograms, error rates, and bandwidth usage in real-time.
-                </p>
-              </div>
-
-              <div className="rounded-xl border border-zinc-800 bg-slate-900/40 p-6 space-y-3 hover:bg-slate-900/60 transition-colors">
-                <div className="h-9 w-9 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center border border-emerald-500/20">
-                  <Layers className="h-5 w-5" />
-                </div>
-                <h4 className="text-base font-semibold text-white">WebSocket Support</h4>
-                <p className="text-xs text-zinc-400 leading-relaxed">
-                  Seamlessly stream WebSocket connections, SSE events, and HTTP/2 multiplexed connections.
-                </p>
-              </div>
-            </div>
-          </div>
-        </section>
+        <Features />
 
         {/* AI SECTION */}
         <section id="ai" className="py-20 border-t border-zinc-800/80 bg-slate-950/60">
