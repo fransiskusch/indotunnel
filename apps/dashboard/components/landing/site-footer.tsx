@@ -42,7 +42,7 @@ export function SiteFooter() {
                 IndoTunnel
               </span>
             </Link>
-            <p className="max-w-xs text-xs leading-relaxed text-zinc-500">
+            <p className="max-w-xs text-xs leading-relaxed text-zinc-400">
               Expose localhost to the internet in seconds. Built for developer
               velocity.
             </p>
@@ -58,7 +58,7 @@ export function SiteFooter() {
                   <li key={`${col.title}-${link.href}-${link.label}`}>
                     <Link
                       href={link.href}
-                      className="text-xs text-zinc-500 transition-colors hover:text-emerald-400"
+                      className="text-xs text-zinc-400 transition-colors hover:text-emerald-400"
                     >
                       {link.label}
                     </Link>
@@ -74,7 +74,7 @@ export function SiteFooter() {
             <span className="inline-block h-2 w-2 rounded-full bg-emerald-400 animate-ping" />
             <span className="text-zinc-200">IndoTunnel Gateways Operational</span>
           </div>
-          <p className="font-mono text-xs text-zinc-500">
+          <p className="font-mono text-xs text-zinc-400">
             © {new Date().getFullYear()} IndoTunnel Inc. All rights reserved.
           </p>
         </div>

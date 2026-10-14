@@ -117,7 +117,7 @@ export function Pricing() {
                     <span
                       className={`font-extrabold tracking-tight ${
                         tier.price === "Coming Soon"
-                          ? "text-2xl text-zinc-500"
+                          ? "text-2xl text-zinc-400"
                           : "text-4xl text-white"
                       }`}
                     >
