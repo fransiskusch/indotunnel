@@ -42,6 +42,9 @@ export default function LandingPage() {
             <a href="#quickstart" className="hover:text-white transition-colors">
               Quickstart
             </a>
+            <a href="#ai" className="hover:text-white transition-colors">
+              AI
+            </a>
             <a href="#pricing" className="hover:text-white transition-colors">
               Pricing
             </a>
@@ -241,6 +244,55 @@ export default function LandingPage() {
                 <h4 className="text-base font-semibold text-white">WebSocket Support</h4>
                 <p className="text-xs text-zinc-400 leading-relaxed">
                   Seamlessly stream WebSocket connections, SSE events, and HTTP/2 multiplexed connections.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* AI SECTION */}
+        <section id="ai" className="py-20 border-t border-zinc-800/80 bg-slate-950/60">
+          <div className="mx-auto max-w-6xl px-4 sm:px-6">
+            <div className="text-center max-w-2xl mx-auto mb-16 space-y-3">
+              <h2 className="text-xs font-mono font-semibold uppercase tracking-widest text-emerald-400">
+                Built on Claude
+              </h2>
+              <h3 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">
+                AI-Powered Tunnel Intelligence
+              </h3>
+              <p className="text-zinc-400 text-sm">
+                Every captured request becomes context for debugging, documentation, and protection — powered by the Claude API.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="rounded-xl border border-zinc-800 bg-slate-900/40 p-6 space-y-3 hover:border-emerald-500/40 transition-colors">
+                <div className="h-9 w-9 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center border border-emerald-500/20">
+                  <RefreshCcw className="h-5 w-5" />
+                </div>
+                <h4 className="text-base font-semibold text-white">AI Webhook Debugger</h4>
+                <p className="text-xs text-zinc-400 leading-relaxed">
+                  Claude reads captured HTTP headers and payloads, diagnoses failed callbacks (Stripe, GitHub, payment gateways), and returns the exact fix.
+                </p>
+              </div>
+
+              <div className="rounded-xl border border-zinc-800 bg-slate-900/40 p-6 space-y-3 hover:border-cyan-500/40 transition-colors">
+                <div className="h-9 w-9 rounded-lg bg-cyan-500/10 text-cyan-400 flex items-center justify-center border border-cyan-500/20">
+                  <Code2 className="h-5 w-5" />
+                </div>
+                <h4 className="text-base font-semibold text-white">Traffic-to-OpenAPI</h4>
+                <p className="text-xs text-zinc-400 leading-relaxed">
+                  Claude converts live captured traffic into OpenAPI specs plus instant mock responses — docs and mocks generated from real requests.
+                </p>
+              </div>
+
+              <div className="rounded-xl border border-zinc-800 bg-slate-900/40 p-6 space-y-3 hover:border-purple-500/40 transition-colors">
+                <div className="h-9 w-9 rounded-lg bg-purple-500/10 text-purple-400 flex items-center justify-center border border-purple-500/20">
+                  <Cpu className="h-5 w-5" />
+                </div>
+                <h4 className="text-base font-semibold text-white">AI Security Filter</h4>
+                <p className="text-xs text-zinc-400 leading-relaxed">
+                  Claude classifies inbound tunnel requests and flags injection attempts and anomalous payloads before they reach your localhost.
                 </p>
               </div>
             </div>
