@@ -3,6 +3,7 @@ import { TerminalDemo } from "@/components/landing/terminal-demo";
 import { SiteHeader } from "@/components/landing/site-header";
 import { SiteFooter } from "@/components/landing/site-footer";
 import { Hero } from "@/components/landing/hero";
+import { Quickstart } from "@/components/landing/quickstart";
 import {
   Zap,
   Globe,
@@ -31,65 +32,7 @@ export default function LandingPage() {
         <Hero />
 
         {/* 3-STEP QUICKSTART SECTION */}
-        <section id="quickstart" className="border-t border-zinc-800/80 bg-slate-950/60 py-20">
-          <div className="mx-auto max-w-6xl px-4 sm:px-6">
-            <div className="text-center max-w-2xl mx-auto mb-16 space-y-3">
-              <h2 className="text-xs font-mono font-semibold uppercase tracking-widest text-emerald-400">
-                Workflow
-              </h2>
-              <h3 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">
-                3 Steps to Public Localhost
-              </h3>
-              <p className="text-zinc-400 text-sm">
-                No complex SSH configs or router port-forwarding required.
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              {/* Step 1 */}
-              <div className="relative rounded-2xl border border-zinc-800 bg-slate-900/40 p-6 space-y-4 hover:border-emerald-500/40 transition-colors">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 font-mono font-bold">
-                  01
-                </div>
-                <h4 className="text-lg font-semibold text-white">Run via NPX or CLI</h4>
-                <p className="text-xs text-zinc-400 leading-relaxed">
-                  No installation required with NPX, or install globally via npm or binary.
-                </p>
-                <div className="bg-zinc-950 p-3 rounded-lg border border-zinc-800/80 font-mono text-xs text-zinc-300">
-                  <span className="text-emerald-400">npx</span> indotunnel 3000
-                </div>
-              </div>
-
-              {/* Step 2 */}
-              <div className="relative rounded-2xl border border-zinc-800 bg-slate-900/40 p-6 space-y-4 hover:border-cyan-500/40 transition-colors">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 font-mono font-bold">
-                  02
-                </div>
-                <h4 className="text-lg font-semibold text-white">Instant Public URL</h4>
-                <p className="text-xs text-zinc-400 leading-relaxed">
-                  Get a secure HTTPS public URL forwarded directly to your local server.
-                </p>
-                <div className="bg-zinc-950 p-3 rounded-lg border border-zinc-800/80 font-mono text-xs text-zinc-300">
-                  Public ➔ <span className="text-cyan-400">https://*.indotunnel.id</span>
-                </div>
-              </div>
-
-              {/* Step 3 */}
-              <div className="relative rounded-2xl border border-zinc-800 bg-slate-900/40 p-6 space-y-4 hover:border-purple-500/40 transition-colors">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-purple-500/10 border border-purple-500/30 text-purple-400 font-mono font-bold">
-                  03
-                </div>
-                <h4 className="text-lg font-semibold text-white">Inspect & Replay</h4>
-                <p className="text-xs text-zinc-400 leading-relaxed">
-                  Open the web dashboard to inspect live traffic, headers, and replay webhooks.
-                </p>
-                <div className="bg-zinc-950 p-3 rounded-lg border border-zinc-800/80 font-mono text-xs text-zinc-300">
-                  Dashboard ➔ <span className="text-purple-400">/dashboard</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
+        <Quickstart />
 
         {/* FEATURES SHOWCASE */}
         <section id="features" className="py-20 border-t border-zinc-800/80">
