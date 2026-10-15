@@ -24,3 +24,6 @@ apps/dashboard/CLAUDE.md
 
 # stray build logs
 apps/dashboard/build_out*.txt
+
+# taste-skill inspector artifacts
+.taste-skill/
