@@ -98,7 +98,7 @@ export function Showcase() {
                     className="flex w-full items-center gap-3 py-2 text-left"
                     style={{
                       color: on ? "var(--ink)" : "var(--ink-muted)",
-                      fontSize: "clamp(20px, 2.2vw, 30px)",
+                      fontSize: "var(--step-lead)",
                     }}
                   >
                     <span
@@ -122,7 +122,7 @@ export function Showcase() {
             className="arch w-full"
             style={{ backgroundColor: "var(--surface-2)" }}
           >
-            <div className="p-6 sm:p-10">
+            <div className="px-6 pb-6 pt-16 sm:px-10 sm:pb-10 sm:pt-20">
               <div
                 data-ui
                 className="rounded-md p-5"

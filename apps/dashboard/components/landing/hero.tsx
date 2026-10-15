@@ -16,18 +16,16 @@ export function Hero() {
   return (
     <section
       ref={sectionRef}
-      className="relative mx-auto max-w-[1600px] px-5 pt-24 pb-32 sm:px-8 lg:pt-32"
+      className="relative mx-auto max-w-[1600px] px-5 pt-20 pb-24 sm:px-8 lg:pt-28"
     >
-      <div className="grid gap-16 lg:grid-cols-12 lg:items-start lg:gap-8">
-        <div className="space-y-8 lg:col-span-6">
+      <div className="grid gap-14 lg:grid-cols-12 lg:items-center lg:gap-8">
+        <div className="space-y-8 lg:col-span-7">
           <h1
             data-rise
-            className="text-balance font-medium leading-[0.95] tracking-[-0.03em] text-[color:var(--ink)]"
+            className="text-balance font-medium leading-[0.98] tracking-[-0.03em] text-[color:var(--ink)]"
             style={{ fontSize: "var(--step-display)" }}
           >
-            Expose localhost
-            <br />
-            to the internet
+            Expose localhost to the internet
           </h1>
 
           <p
@@ -49,13 +47,13 @@ export function Hero() {
           </Link>
         </div>
 
-        <div className="lg:col-span-6 lg:pt-2">
+        <div className="lg:col-span-5 lg:pt-2">
           <div
             ref={stageRef}
             className="arch w-full"
             style={{ backgroundColor: "var(--brand)" }}
           >
-            <div className="p-6 sm:p-10">
+            <div className="px-6 pb-6 pt-16 sm:px-10 sm:pb-10 sm:pt-20">
               <div
                 className="w-full overflow-hidden rounded-md"
                 style={{ backgroundColor: "var(--surface-2)" }}

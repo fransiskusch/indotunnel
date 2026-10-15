@@ -20,7 +20,7 @@ export function Cta() {
           <h2
             data-rise
             className="font-medium leading-[0.92] tracking-[-0.03em]"
-            style={{ fontSize: "clamp(44px, 7vw, 112px)", color: "var(--brand-ink)" }}
+            style={{ fontSize: "var(--step-display)", color: "var(--brand-ink)" }}
           >
             Start in
             <br />
@@ -28,7 +28,7 @@ export function Cta() {
           </h2>
           <p
             data-rise
-            className="mt-6 max-w-[36ch] text-[17px]"
+            className="mt-6 max-w-[36ch] text-[18px]"
             style={{ color: "var(--brand-ink)" }}
           >
             Name your workspace and you are on the dashboard with your first
@@ -44,7 +44,7 @@ export function Cta() {
             style={{ boxShadow: "0 24px 60px -20px rgba(0,0,0,0.45)" }}
           >
             <h3 className="text-[18px] font-semibold">Name your workspace</h3>
-            <p className="mt-1 text-[14px] text-[#6b6b6b]">
+            <p className="mt-1 text-[15px] text-[#6b6b6b]">
               You can rename this later in settings.
             </p>
 
@@ -71,7 +71,7 @@ export function Cta() {
                     type="button"
                     onClick={() => setScope(option)}
                     aria-pressed={scope === option}
-                    className="flex-1 rounded px-3 py-2 text-[14px] font-medium capitalize transition-colors"
+                    className="flex-1 rounded px-3 py-2 text-[15px] font-medium capitalize transition-colors"
                     style={{
                       backgroundColor: scope === option ? "#111111" : "transparent",
                       color: scope === option ? "#ffffff" : "#6b6b6b",

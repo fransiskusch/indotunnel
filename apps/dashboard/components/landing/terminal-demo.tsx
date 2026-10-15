@@ -173,7 +173,7 @@ export function TerminalDemo() {
             <div className="space-y-2">
               <div className="text-[color:var(--ink-muted)]">Headers</div>
               <pre
-                className="overflow-x-auto rounded-md p-3 text-[12px] text-[color:var(--ink)]"
+                className="overflow-x-auto rounded-md p-3 text-[13px] text-[color:var(--ink)]"
                 style={{ backgroundColor: "var(--surface-3)" }}
               >
 {`Host: a8f2x.indotunnel.id
@@ -189,7 +189,7 @@ X-Stripe-Signature: t=169700,v1=9a8b7c6d5e4f`}
                 <span>JSON, 128 bytes</span>
               </div>
               <pre
-                className="overflow-x-auto rounded-md p-3 text-[12px] text-[color:var(--ink)]"
+                className="overflow-x-auto rounded-md p-3 text-[13px] text-[color:var(--ink)]"
                 style={{ backgroundColor: "var(--surface-3)" }}
               >
 {`{

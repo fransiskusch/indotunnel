@@ -40,9 +40,9 @@
 
   --step-small: clamp(0.8125rem, 0.79rem + 0.1vw, 0.875rem);
   --step-body: clamp(1rem, 0.96rem + 0.2vw, 1.125rem);
-  --step-lead: clamp(1.25rem, 1.1rem + 0.7vw, 1.625rem);
-  --step-head: clamp(2rem, 1.3rem + 3.2vw, 4rem);
-  --step-display: clamp(3.25rem, 1.6rem + 6.6vw, 8rem);
+  --step-lead: clamp(1.375rem, 1.2rem + 0.8vw, 1.75rem);
+  --step-head: clamp(2rem, 1.4rem + 2.6vw, 3.25rem);
+  --step-display: clamp(2.5rem, 1rem + 4.6vw, 4.75rem);
 }
 
 @theme inline {
@@ -76,10 +76,11 @@ body {
   font-feature-settings: "rlig" 1, "calt" 1;
 }
 
-/* The motif: the tunnel mouth. One shape: a block whose top-left corner is a
-   quarter circle, so it reads as an opening a request passes through. */
+/* The motif: the tunnel mouth. One shape: a block with a rounded top, so it
+   reads as the opening a request passes through. Moderate radius so the
+   fragment inside is never clipped by the curve. */
 .arch {
-  border-top-left-radius: 100% 60%;
+  border-radius: 64px 64px 0 0;
   overflow: hidden;
 }
 

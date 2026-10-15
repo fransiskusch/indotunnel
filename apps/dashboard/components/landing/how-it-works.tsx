@@ -89,7 +89,7 @@ export function HowItWorks() {
                 className="flex w-full items-center justify-between px-6 py-5 text-left lg:h-full lg:flex-col lg:items-start lg:justify-end lg:gap-6"
               >
                 <span
-                  className="text-[20px] font-medium text-[color:var(--ink)]"
+                  className="text-[18px] font-medium text-[color:var(--ink)]"
                 >
                   {step.name}
                 </span>
@@ -107,17 +107,17 @@ export function HowItWorks() {
                 className="px-6 pb-6"
               >
                 <p
-                  className="max-w-[42ch] text-[color:var(--ink-muted)]"
+                  className="max-w-[46ch] text-[color:var(--ink-muted)]"
                   style={{ fontSize: "var(--step-body)" }}
                 >
-                  {step.body}
+                  {step.body} Run it with{" "}
+                  <code
+                    className="rounded px-1.5 py-0.5 text-[color:var(--ink)]"
+                    style={{ backgroundColor: "var(--bg)" }}
+                  >
+                    {step.command}
+                  </code>
                 </p>
-                <pre
-                  className="mt-5 inline-block rounded-md px-4 py-3 text-[14px] text-[color:var(--ink)]"
-                  style={{ backgroundColor: "var(--bg)" }}
-                >
-                  {step.command}
-                </pre>
               </div>
             </div>
           );

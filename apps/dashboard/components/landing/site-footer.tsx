@@ -64,7 +64,7 @@ export function SiteFooter() {
         </div>
 
         <div className="mt-16 flex flex-col items-start justify-between gap-6 sm:flex-row sm:items-center">
-          <div className="flex items-center gap-3 text-[14px] text-[color:var(--ink-muted)]">
+          <div className="flex items-center gap-3 text-[15px] text-[color:var(--ink-muted)]">
             <span
               className="h-2 w-2 rounded-full"
               style={{ backgroundColor: "var(--brand)" }}
@@ -72,7 +72,7 @@ export function SiteFooter() {
             />
             IndoTunnel gateways operational
           </div>
-          <p className="text-[14px] text-[color:var(--ink-muted)]">
+          <p className="text-[15px] text-[color:var(--ink-muted)]">
             © {new Date().getFullYear()} IndoTunnel Inc. All rights reserved.
           </p>
         </div>

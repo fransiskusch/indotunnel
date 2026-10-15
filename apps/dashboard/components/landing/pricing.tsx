@@ -86,7 +86,7 @@ export function Pricing() {
                   className="flex items-center gap-4 py-2 text-left leading-[1.1]"
                   style={{
                     color: on ? "var(--ink)" : "var(--ink-muted)",
-                    fontSize: "clamp(32px, 5vw, 64px)",
+                    fontSize: "var(--step-head)",
                     fontWeight: 500,
                     letterSpacing: "-0.02em",
                   }}
@@ -113,7 +113,7 @@ export function Pricing() {
                 style={{
                   fontSize:
                     plan.price === "Coming soon"
-                      ? "clamp(28px, 4vw, 48px)"
+                      ? "var(--step-head)"
                       : "clamp(48px, 9vw, 112px)",
                 }}
               >

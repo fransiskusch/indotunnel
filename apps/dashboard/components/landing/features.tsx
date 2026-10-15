@@ -21,10 +21,7 @@ export function Features() {
     {
       span: "lg:col-span-4 lg:row-span-2",
       ui: (
-        <div className="flex h-full flex-col justify-center gap-4 p-6">
-          <span className="text-[13px] text-[color:var(--ink-muted)]">
-            Tunnel status
-          </span>
+        <div data-ui className="flex h-full flex-col justify-center gap-4 p-6">
           <span
             className="text-3xl font-medium"
             style={{ color: "var(--brand)" }}
@@ -32,7 +29,7 @@ export function Features() {
             Online
           </span>
           <span className="text-[15px] text-[color:var(--ink-muted)]">
-            id-cgk.gateway.indotunnel.id
+            Tunnel live at id-cgk.gateway.indotunnel.id
           </span>
         </div>
       ),
@@ -42,7 +39,7 @@ export function Features() {
     {
       span: "lg:col-span-2",
       ui: (
-        <div className="flex items-center justify-between p-6">
+        <div data-ui className="flex items-center justify-between p-6">
           <span className="text-[15px] text-[color:var(--ink)]">Replay</span>
           <span
             className="rounded-md px-3 py-1 text-[13px] font-medium"
@@ -79,7 +76,7 @@ export function Features() {
     {
       span: "lg:col-span-2",
       ui: (
-        <div className="p-6">
+        <div data-ui className="p-6">
           <div className="flex items-center gap-3">
             <span
               className="relative h-6 w-11 rounded-full"
@@ -100,7 +97,7 @@ export function Features() {
     {
       span: "lg:col-span-2",
       ui: (
-        <div className="p-6">
+        <div data-ui className="p-6">
           <span className="text-4xl font-medium text-[color:var(--ink)]">
             5,000
           </span>
@@ -113,14 +110,14 @@ export function Features() {
       line: "Throughput, latency and error rates in real time.",
     },
     {
-      span: "lg:col-span-4 lg:row-span-1",
+      span: "lg:col-span-4",
       ui: (
         <div className="flex h-full flex-col justify-center p-6">
           <h2
-            className="font-medium leading-[1.0] tracking-[-0.02em] text-[color:var(--ink)]"
+            className="font-medium leading-[1.05] tracking-[-0.02em] text-[color:var(--ink)]"
             style={{ fontSize: "var(--step-head)" }}
           >
-            Built for high-speed engineering
+            Built for speed
           </h2>
         </div>
       ),

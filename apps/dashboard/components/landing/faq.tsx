@@ -90,7 +90,7 @@ export function Faq() {
                 aria-controls={`faq-${i}`}
                 className="flex w-full items-center justify-between gap-4 px-6 py-5 text-left"
               >
-                <span className="text-[20px] font-medium text-[color:var(--ink)]">
+                <span className="text-[18px] font-medium text-[color:var(--ink)]">
                   {card.question}
                 </span>
                 <span className="shrink-0 text-[13px] text-[color:var(--ink-muted)]">
