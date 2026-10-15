@@ -1,112 +1,169 @@
-import {
-  Globe,
-  RefreshCcw,
-  Zap,
-  ShieldCheck,
-  Code2,
-  Layers,
-  type LucideIcon,
-} from "lucide-react";
-import { Stagger, StaggerItem } from "@/components/landing/reveal";
+"use client";
 
-interface Feature {
-  icon: LucideIcon;
-  title: string;
-  body: string;
+import { useRef } from "react";
+import { useReveal } from "@/components/landing/motion";
+
+interface Tile {
+  span: string;
+  name?: string;
+  line?: string;
+  ui?: React.ReactNode;
 }
 
-const FEATURES: Feature[] = [
-  {
-    icon: Globe,
-    title: "Instant Subdomains",
-    body: "Get deterministic custom subdomains or random subdomains with HTTPS automatic SSL certificates.",
-  },
-  {
-    icon: RefreshCcw,
-    title: "Webhook Replaying",
-    body: "Never trigger a Stripe or GitHub webhook twice. Replay saved requests with 1-click inside dashboard.",
-  },
-  {
-    icon: Zap,
-    title: "Ultra Low Latency",
-    body: "Powered by Go & Redis gateway nodes in Southeast Asia for minimal round-trip latency.",
-  },
-  {
-    icon: ShieldCheck,
-    title: "Token Authorization",
-    body: "Protect your public endpoints with HTTP Basic Auth, IP Whitelisting, or Bearer auth tokens.",
-  },
-  {
-    icon: Code2,
-    title: "Traffic Metrics & Logs",
-    body: "Track request throughput, latency histograms, error rates, and bandwidth usage in real-time.",
-  },
-  {
-    icon: Layers,
-    title: "WebSocket Support",
-    body: "Seamlessly stream WebSocket connections, SSE events, and HTTP/2 multiplexed connections.",
-  },
-];
+const CAP = "text-[color:var(--ink)]";
+const MUTED = "text-[color:var(--ink-muted)]";
 
 export function Features() {
-  return (
-    <section id="features" className="border-t border-zinc-800/80 py-20">
-      <div className="mx-auto max-w-6xl px-4 sm:px-6">
-        <div className="mx-auto mb-16 max-w-2xl space-y-3 text-center">
-          <h2 className="font-mono text-xs font-semibold uppercase tracking-widest text-cyan-400">
-            Developer Ergonomics
-          </h2>
-          <h3 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">
-            Built for High-Speed Engineering
-          </h3>
-          <p className="text-sm text-zinc-400">
-            Everything you need to test webhooks, show work to clients, and build
-            APIs.
-          </p>
-        </div>
+  const ref = useRef<HTMLElement>(null);
+  useReveal(ref, "[data-rise]");
 
-        <Stagger className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {FEATURES.map((feature, index) => {
-            const Icon = feature.icon;
-            const lead = index === 0;
-            return (
-              <StaggerItem
-                key={feature.title}
-                className={lead ? "lg:col-span-2" : undefined}
-              >
-                <div
-                  className={`group h-full rounded-2xl border border-zinc-800 bg-slate-900/40 transition-all hover:-translate-y-0.5 hover:border-emerald-500/40 hover:bg-slate-900/60 ${
-                    lead ? "p-8" : "p-6"
-                  }`}
-                >
-                  <div className="space-y-3">
-                    <div
-                      className={`flex items-center justify-center rounded-lg border border-emerald-500/20 bg-emerald-500/10 text-emerald-400 ${
-                        lead ? "h-12 w-12" : "h-9 w-9"
-                      }`}
-                    >
-                      <Icon className={lead ? "h-6 w-6" : "h-5 w-5"} />
-                    </div>
-                    <h4
-                      className={`font-semibold text-white ${
-                        lead ? "text-xl" : "text-base"
-                      }`}
-                    >
-                      {feature.title}
-                    </h4>
-                    <p
-                      className={`leading-relaxed text-zinc-400 ${
-                        lead ? "max-w-lg text-sm" : "text-xs"
-                      }`}
-                    >
-                      {feature.body}
-                    </p>
-                  </div>
-                </div>
-              </StaggerItem>
-            );
-          })}
-        </Stagger>
+  const tiles: Tile[] = [
+    {
+      span: "lg:col-span-4 lg:row-span-2",
+      ui: (
+        <div className="flex h-full flex-col justify-center gap-4 p-6">
+          <span className="text-[13px] text-[color:var(--ink-muted)]">
+            Tunnel status
+          </span>
+          <span
+            className="text-3xl font-medium"
+            style={{ color: "var(--brand)" }}
+          >
+            Online
+          </span>
+          <span className="text-[15px] text-[color:var(--ink-muted)]">
+            id-cgk.gateway.indotunnel.id
+          </span>
+        </div>
+      ),
+      name: "Instant subdomains",
+      line: "Deterministic or random subdomains with automatic HTTPS.",
+    },
+    {
+      span: "lg:col-span-2",
+      ui: (
+        <div className="flex items-center justify-between p-6">
+          <span className="text-[15px] text-[color:var(--ink)]">Replay</span>
+          <span
+            className="rounded-md px-3 py-1 text-[13px] font-medium"
+            style={{ backgroundColor: "var(--brand)", color: "var(--brand-ink)" }}
+          >
+            1-click
+          </span>
+        </div>
+      ),
+      name: "Webhook replaying",
+      line: "Re-send saved requests from the dashboard.",
+    },
+    {
+      span: "lg:col-span-2",
+      ui: (
+        <div className="flex h-full items-center justify-center gap-1 p-6">
+          {["G", "o", "R", "e"].map((c, i) => (
+            <span
+              key={i}
+              className="flex h-12 w-12 items-center justify-center rounded-md text-[18px] font-medium"
+              style={{
+                backgroundColor: "var(--surface-3)",
+                color: "var(--ink)",
+              }}
+            >
+              {c}
+            </span>
+          ))}
+        </div>
+      ),
+      name: "Ultra low latency",
+      line: "Go and Redis gateways in Southeast Asia.",
+    },
+    {
+      span: "lg:col-span-2",
+      ui: (
+        <div className="p-6">
+          <div className="flex items-center gap-3">
+            <span
+              className="relative h-6 w-11 rounded-full"
+              style={{ backgroundColor: "var(--brand)" }}
+            >
+              <span
+                className="absolute top-0.5 h-5 w-5 rounded-full"
+                style={{ left: "22px", backgroundColor: "var(--brand-ink)" }}
+              />
+            </span>
+            <span className="text-[15px] text-[color:var(--ink)]">Bearer</span>
+          </div>
+        </div>
+      ),
+      name: "Token authorization",
+      line: "Basic auth, bearer tokens or IP allowlists.",
+    },
+    {
+      span: "lg:col-span-2",
+      ui: (
+        <div className="p-6">
+          <span className="text-4xl font-medium text-[color:var(--ink)]">
+            5,000
+          </span>
+          <span className="ml-2 text-[15px] text-[color:var(--ink-muted)]">
+            req / day
+          </span>
+        </div>
+      ),
+      name: "Traffic metrics",
+      line: "Throughput, latency and error rates in real time.",
+    },
+    {
+      span: "lg:col-span-4 lg:row-span-1",
+      ui: (
+        <div className="flex h-full flex-col justify-center p-6">
+          <h2
+            className="font-medium leading-[1.0] tracking-[-0.02em] text-[color:var(--ink)]"
+            style={{ fontSize: "var(--step-head)" }}
+          >
+            Built for high-speed engineering
+          </h2>
+        </div>
+      ),
+    },
+    {
+      span: "lg:col-span-4",
+      ui: (
+        <div className="p-6">
+          <div className="flex items-center gap-3 text-[15px]">
+            <span className="text-[color:var(--ink)]">WebSocket</span>
+            <span className="text-[color:var(--ink-muted)]">SSE</span>
+            <span className="text-[color:var(--ink-muted)]">HTTP/2</span>
+          </div>
+        </div>
+      ),
+      name: "WebSocket support",
+      line: "Streaming connections, multiplexed.",
+    },
+  ];
+
+  return (
+    <section
+      id="features"
+      ref={ref}
+      className="mx-auto max-w-[1600px] px-5 py-28 sm:px-8"
+    >
+      <div className="grid grid-flow-dense grid-cols-1 gap-2 lg:grid-cols-12">
+        {tiles.map((tile, i) => (
+          <div
+            key={i}
+            data-rise
+            className={`${tile.span} flex flex-col rounded-md`}
+            style={{ backgroundColor: "var(--surface-2)" }}
+          >
+            <div className="min-h-[160px] flex-1">{tile.ui}</div>
+            {tile.name && (
+              <div className="px-6 pb-6">
+                <p className={`text-[18px] font-medium ${CAP}`}>{tile.name}</p>
+                <p className={`mt-1 text-[15px] ${MUTED}`}>{tile.line}</p>
+              </div>
+            )}
+          </div>
+        ))}
       </div>
     </section>
   );
