@@ -1,171 +1,176 @@
-import Link from "next/link";
-import { CheckCircle2 } from "lucide-react";
-import { Stagger, StaggerItem } from "@/components/landing/reveal";
+"use client";
 
-interface Tier {
+import Link from "next/link";
+import { useRef, useState } from "react";
+import { useReveal } from "@/components/landing/motion";
+
+interface Plan {
   name: string;
-  badge: string;
-  badgeClass: string;
   price: string;
-  priceNote?: string;
+  period?: string;
   blurb: string;
   features: string[];
-  checkClass: string;
-  featured?: boolean;
+  cta: { label: string; href?: string };
 }
 
-const TIERS: Tier[] = [
+const PLANS: Plan[] = [
   {
     name: "Free",
-    badge: "No Expiry",
-    badgeClass:
-      "text-emerald-400 bg-emerald-500/10 border-emerald-500/20",
     price: "$0",
-    priceNote: "/ forever free",
-    blurb: "Perfect for quick local testing and webhook debugging.",
-    checkClass: "text-emerald-400",
+    period: "forever",
+    blurb:
+      "For quick local testing and webhook debugging. No credit card, no expiry.",
     features: [
-      "1 Concurrent Tunnel",
-      "5,000 Requests / day",
-      "10 GB Bandwidth / month",
+      "1 concurrent tunnel",
+      "5,000 requests per day",
+      "10 GB bandwidth per month",
       "Random HTTPS subdomains",
-      "Live HTTP Inspector & Webhook Replay",
-      "No credit card required",
+      "Live HTTP inspector and webhook replay",
     ],
+    cta: { label: "Get started free", href: "/signup" },
   },
   {
     name: "Developer",
-    badge: "Pro Dev",
-    badgeClass: "text-emerald-400 bg-emerald-500/10 border-emerald-500/20",
-    price: "Coming Soon",
-    blurb: "For active developers & freelance API integrators.",
-    checkClass: "text-emerald-400",
-    featured: true,
+    price: "Coming soon",
+    blurb:
+      "For active developers and freelance API integrators who need reserved names and history.",
     features: [
-      "5 Concurrent Tunnels",
-      "50,000 Requests / day",
-      "Reserved Custom Subdomains",
-      "1-Click Webhook Replaying",
-      "30-Day Request Inspection History",
+      "5 concurrent tunnels",
+      "50,000 requests per day",
+      "Reserved custom subdomains",
+      "1-click webhook replaying",
+      "30-day request inspection history",
     ],
+    cta: { label: "Coming soon" },
   },
   {
     name: "Team",
-    badge: "Organization",
-    badgeClass: "text-cyan-400 bg-cyan-500/10 border-cyan-500/20",
-    price: "Coming Soon",
+    price: "Coming soon",
     blurb:
-      "For engineering teams, custom CNAME domains & priority gateway.",
-    checkClass: "text-cyan-400",
+      "For engineering teams that need custom domains, shared workspaces and priority routing.",
     features: [
-      "Unlimited Tunnels",
-      "500,000 Requests / day",
-      "Custom Domain CNAME (`tunnel.mycompany.com`)",
-      "Team Workspace & RBAC",
+      "Unlimited tunnels",
+      "500,000 requests per day",
+      "Custom domain CNAME (tunnel.mycompany.com)",
+      "Team workspace and RBAC",
     ],
+    cta: { label: "Coming soon" },
   },
 ];
 
 export function Pricing() {
+  const ref = useRef<HTMLElement>(null);
+  const [active, setActive] = useState(1);
+  useReveal(ref, "[data-rise]");
+
+  const plan = PLANS[active];
+
   return (
     <section
       id="pricing"
-      className="border-t border-zinc-800/80 bg-slate-950/60 py-20"
+      ref={ref}
+      className="mx-auto max-w-[1600px] px-5 py-28 sm:px-8"
     >
-      <div className="mx-auto max-w-6xl px-4 sm:px-6">
-        <div className="mx-auto mb-16 max-w-2xl space-y-3 text-center">
-          <h2 className="font-mono text-xs font-semibold uppercase tracking-widest text-emerald-400">
-            Transparent Plans
-          </h2>
-          <h3 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">
-            Simple &amp; Predictable Pricing
-          </h3>
-          <p className="text-sm text-zinc-400">
-            Free while we build. Paid tiers are coming, no launch date yet.
-          </p>
-        </div>
+      <div className="grid gap-16 lg:grid-cols-12">
+        <ul className="lg:col-span-6">
+          {PLANS.map((p, i) => {
+            const on = i === active;
+            return (
+              <li key={p.name}>
+                <button
+                  type="button"
+                  data-rise
+                  onClick={() => setActive(i)}
+                  onFocus={() => setActive(i)}
+                  aria-pressed={on}
+                  className="flex items-center gap-4 py-2 text-left leading-[1.1]"
+                  style={{
+                    color: on ? "var(--ink)" : "var(--ink-muted)",
+                    fontSize: "clamp(32px, 5vw, 64px)",
+                    fontWeight: 500,
+                    letterSpacing: "-0.02em",
+                  }}
+                >
+                  <span
+                    className="h-3 w-3 shrink-0 rounded-full"
+                    style={{
+                      backgroundColor: on ? "var(--brand)" : "transparent",
+                    }}
+                    aria-hidden
+                  />
+                  {p.name}
+                </button>
+              </li>
+            );
+          })}
+        </ul>
 
-        <Stagger className="grid grid-cols-1 items-stretch gap-8 md:grid-cols-3">
-          {TIERS.map((tier) => (
-            <StaggerItem key={tier.name} className="h-full">
-              <div
-                className={`relative flex h-full flex-col justify-between space-y-8 rounded-2xl p-7 ${
-                  tier.featured
-                    ? "border-2 border-emerald-500/80 bg-slate-900/80 glow-emerald"
-                    : "border border-zinc-800 bg-slate-900/40"
-                }`}
+        <div className="lg:col-span-5 lg:col-start-8">
+          <div data-rise>
+            <div className="flex items-baseline gap-3">
+              <span
+                className="font-medium tracking-[-0.02em] text-[color:var(--ink)]"
+                style={{
+                  fontSize:
+                    plan.price === "Coming soon"
+                      ? "clamp(28px, 4vw, 48px)"
+                      : "clamp(48px, 9vw, 112px)",
+                }}
               >
-                {tier.featured && (
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-emerald-500 px-3 py-0.5 font-mono text-[10px] font-extrabold uppercase tracking-wider text-black">
-                    Coming Soon
-                  </div>
-                )}
+                {plan.price}
+              </span>
+              {plan.period && (
+                <span className="text-[18px] text-[color:var(--ink-muted)]">
+                  {plan.period}
+                </span>
+              )}
+            </div>
 
-                <div className="space-y-5">
-                  <div className="flex items-center justify-between">
-                    <span className="text-base font-bold text-white">
-                      {tier.name}
-                    </span>
-                    <span
-                      className={`rounded border px-2 py-0.5 font-mono text-xs ${tier.badgeClass}`}
-                    >
-                      {tier.badge}
-                    </span>
-                  </div>
+            <p
+              className="mt-6 max-w-[48ch] text-[color:var(--ink-muted)]"
+              style={{ fontSize: "var(--step-body)" }}
+            >
+              {plan.blurb}
+            </p>
 
-                  <div className="flex items-baseline gap-1.5">
-                    <span
-                      className={`font-extrabold tracking-tight ${
-                        tier.price === "Coming Soon"
-                          ? "text-2xl text-zinc-400"
-                          : "text-4xl text-white"
-                      }`}
-                    >
-                      {tier.price}
-                    </span>
-                    {tier.priceNote && (
-                      <span className="text-xs text-zinc-400">
-                        {tier.priceNote}
-                      </span>
-                    )}
-                  </div>
+            <ul className="mt-8 space-y-3">
+              {plan.features.map((f) => (
+                <li
+                  key={f}
+                  className="flex items-center gap-3 text-[color:var(--ink)]"
+                  style={{ fontSize: "var(--step-body)" }}
+                >
+                  <span
+                    className="h-2 w-2 shrink-0 rounded-full"
+                    style={{ backgroundColor: "var(--brand)" }}
+                    aria-hidden
+                  />
+                  {f}
+                </li>
+              ))}
+            </ul>
 
-                  <p className="text-xs leading-relaxed text-zinc-400">
-                    {tier.blurb}
-                  </p>
-
-                  <ul className="space-y-3 border-t border-zinc-800 pt-5 text-xs text-zinc-300">
-                    {tier.features.map((feature) => (
-                      <li key={feature} className="flex items-center gap-2">
-                        <CheckCircle2
-                          className={`h-4 w-4 shrink-0 ${tier.checkClass}`}
-                        />
-                        {feature}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-
-                {tier.name === "Free" ? (
-                  <Link
-                    href="/signup"
-                    className="w-full rounded-lg bg-emerald-500 py-2.5 text-center text-xs font-bold text-black transition-colors hover:bg-emerald-400"
-                  >
-                    Get Started Free
-                  </Link>
-                ) : (
-                  <button
-                    type="button"
-                    disabled
-                    className="w-full cursor-not-allowed rounded-lg bg-zinc-800/80 py-2.5 text-center text-xs font-semibold text-zinc-500"
-                  >
-                    Coming Soon
-                  </button>
-                )}
-              </div>
-            </StaggerItem>
-          ))}
-        </Stagger>
+            <div className="mt-10">
+              {plan.cta.href ? (
+                <Link
+                  href={plan.cta.href}
+                  className="inline-block rounded-md bg-[color:var(--brand)] px-6 py-3 text-[15px] font-medium text-[color:var(--brand-ink)] transition-transform active:scale-[0.97]"
+                >
+                  {plan.cta.label}
+                </Link>
+              ) : (
+                <button
+                  type="button"
+                  disabled
+                  className="inline-block cursor-not-allowed rounded-md px-6 py-3 text-[15px] font-medium text-[color:var(--ink-muted)]"
+                  style={{ backgroundColor: "var(--surface-3)" }}
+                >
+                  {plan.cta.label}
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
       </div>
     </section>
   );
