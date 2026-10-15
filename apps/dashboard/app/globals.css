@@ -21,6 +21,28 @@
   --radius: 0.5rem;
   --surface: 217 33% 11%;
   --surface-hover: 217 33% 14%;
+
+  /* Landing (taste-skill) tokens: one ground, one ink, one accent. */
+  --bg: #0b0f14;
+  --surface-2: #12171f;
+  --surface-3: #171d27;
+  --ink: #f4f6f8;
+  --ink-muted: #9aa4b2;
+  --brand: #10b981;
+  --brand-ink: #04140d;
+
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-soft: cubic-bezier(0.33, 1, 0.68, 1);
+  --t-press: 140ms;
+  --t-hover: 180ms;
+  --t-ui: 240ms;
+  --t-reveal: 800ms;
+
+  --step-small: clamp(0.8125rem, 0.79rem + 0.1vw, 0.875rem);
+  --step-body: clamp(1rem, 0.96rem + 0.2vw, 1.125rem);
+  --step-lead: clamp(1.25rem, 1.1rem + 0.7vw, 1.625rem);
+  --step-head: clamp(2rem, 1.3rem + 3.2vw, 4rem);
+  --step-display: clamp(3.25rem, 1.6rem + 6.6vw, 8rem);
 }
 
 @theme inline {
@@ -44,99 +66,33 @@
   --radius-lg: var(--radius);
   --color-surface: hsl(var(--surface));
   --color-surface-hover: hsl(var(--surface-hover));
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: "General Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
 }
 
 body {
-  background-color: #080c14;
-  color: #f1f5f9;
+  background-color: var(--bg);
+  color: var(--ink);
   font-feature-settings: "rlig" 1, "calt" 1;
 }
 
-/* DevTool custom glowing effects & terminal styling */
-.glow-emerald {
-  box-shadow: 0 0 35px -5px rgba(16, 185, 129, 0.25);
-}
-
-.glow-cyan {
-  box-shadow: 0 0 35px -5px rgba(6, 182, 212, 0.25);
-}
-
-.bg-grid-pattern {
-  background-size: 32px 32px;
-  background-image: 
-    linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+/* The motif: the tunnel mouth. One shape: a block whose top-left corner is a
+   quarter circle, so it reads as an opening a request passes through. */
+.arch {
+  border-top-left-radius: 100% 60%;
+  overflow: hidden;
 }
 
 .text-balance {
   text-wrap: balance;
 }
 
-/* Scroll reveal: CSS-only so SSR HTML never ships content hidden behind an
-   inline opacity:0. Falls back to fully visible when view() timelines are
-   unsupported, and is disabled entirely under reduced motion. */
-.reveal {
-  opacity: 1;
-}
-
-@supports (animation-timeline: view()) {
-  .reveal {
-    animation: fade-up 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
-    animation-timeline: view();
-    animation-range: entry 10% cover 35%;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .reveal {
-    animation: none !important;
-    opacity: 1 !important;
-    transform: none !important;
-  }
-}
-
-.bg-noise {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
-}
-
-@keyframes fade-up {
-  from {
+/* Section entrances. Hidden state only applies under html.js, so no-JS users
+   and reduced-motion users see every section fully. */
+@media (prefers-reduced-motion: no-preference) {
+  .js [data-rise] {
     opacity: 0;
-    transform: translateY(16px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes shimmer {
-  from {
-    background-position: -200% 0;
-  }
-  to {
-    background-position: 200% 0;
-  }
-}
-
-@keyframes pulse-glow {
-  0%,
-  100% {
-    box-shadow: 0 0 20px -6px rgba(16, 185, 129, 0.25);
-  }
-  50% {
-    box-shadow: 0 0 34px -4px rgba(16, 185, 129, 0.5);
-  }
-}
-
-@keyframes grid-drift {
-  from {
-    background-position: 0 0;
-  }
-  to {
-    background-position: 32px 32px;
+    transform: translateY(24px);
   }
 }
 
@@ -156,7 +112,7 @@ body {
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #080c14;
+  background: var(--bg);
 }
 ::-webkit-scrollbar-thumb {
   background: #1e293b;
