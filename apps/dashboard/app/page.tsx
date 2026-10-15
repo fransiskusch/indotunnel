@@ -1,7 +1,7 @@
 import { SiteHeader } from "@/components/landing/site-header";
 import { SiteFooter } from "@/components/landing/site-footer";
 import { Hero } from "@/components/landing/hero";
-import { Quickstart } from "@/components/landing/quickstart";
+import { HowItWorks } from "@/components/landing/how-it-works";
 import { Features } from "@/components/landing/features";
 import { AiSection } from "@/components/landing/ai-section";
 import { Pricing } from "@/components/landing/pricing";
@@ -20,11 +20,11 @@ export default function LandingPage() {
         {/* HERO SECTION */}
         <Hero />
 
-        {/* 3-STEP QUICKSTART SECTION */}
-        <Quickstart />
-
         {/* FEATURES SHOWCASE */}
         <Features />
+
+        {/* HOW IT WORKS */}
+        <HowItWorks />
 
         {/* AI SECTION */}
         <AiSection />
