@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef } from "react";
-import { useReveal } from "@/components/landing/motion";
+import { useReveal, useCountUp } from "@/components/landing/motion";
 
 interface Tile {
   span: string;
@@ -12,6 +12,21 @@ interface Tile {
 
 const CAP = "text-[color:var(--ink)]";
 const MUTED = "text-[color:var(--ink-muted)]";
+
+/** A figure that counts up once, when its tile first enters. */
+function Figure() {
+  const ref = useRef<HTMLSpanElement>(null);
+  useCountUp(ref);
+  return (
+    <span
+      ref={ref}
+      data-value="5,000"
+      className="text-4xl font-medium text-[color:var(--ink)] [font-variant-numeric:tabular-nums]"
+    >
+      5,000
+    </span>
+  );
+}
 
 export function Features() {
   const ref = useRef<HTMLElement>(null);
@@ -98,9 +113,7 @@ export function Features() {
       span: "lg:col-span-2",
       ui: (
         <div data-ui className="p-6">
-          <span className="text-4xl font-medium text-[color:var(--ink)]">
-            5,000
-          </span>
+          <Figure />
           <span className="ml-2 text-[16px] text-[color:var(--ink-muted)]">
             req / day
           </span>

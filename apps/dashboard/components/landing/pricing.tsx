@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRef, useState } from "react";
-import { useReveal } from "@/components/landing/motion";
+import { useReveal, useSwap } from "@/components/landing/motion";
 
 interface Plan {
   name: string;
@@ -60,8 +60,10 @@ const PLANS: Plan[] = [
 
 export function Pricing() {
   const ref = useRef<HTMLElement>(null);
+  const stage = useRef<HTMLDivElement>(null);
   const [active, setActive] = useState(1);
   useReveal(ref, "[data-rise]");
+  useSwap(stage, active);
 
   const plan = PLANS[active];
 
@@ -107,7 +109,7 @@ export function Pricing() {
         </ul>
 
         <div className="lg:col-span-5 lg:col-start-8">
-          <div data-rise>
+          <div ref={stage} data-rise>
             <div className="flex items-baseline gap-3">
               <span
                 className="font-medium tracking-[-0.02em] text-[color:var(--ink)]"

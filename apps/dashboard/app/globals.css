@@ -1,35 +1,40 @@
 @import "tailwindcss";
 
 :root {
-  --background: 222 47% 5%;
-  --foreground: 210 40% 98%;
-  --card: 222 47% 7%;
-  --card-foreground: 210 40% 98%;
-  --primary: 160 84% 39%;
-  --primary-foreground: 222 47% 5%;
-  --secondary: 217 33% 15%;
-  --secondary-foreground: 210 40% 98%;
-  --muted: 217 33% 13%;
-  --muted-foreground: 215 20.2% 65.1%;
-  --accent: 187 92% 41%;
-  --accent-foreground: 210 40% 98%;
-  --destructive: 0 84.2% 60.2%;
-  --destructive-foreground: 210 40% 98%;
-  --border: 217 33% 16%;
-  --input: 217 33% 16%;
-  --ring: 160 84% 39%;
-  --radius: 0.5rem;
-  --surface: 217 33% 11%;
-  --surface-hover: 217 33% 14%;
-
-  /* Landing (taste-skill) tokens: one ground, one ink, one accent. */
+  /* One ground, one ink, one accent. Surfaces step in tone, never by a line. */
   --bg: #0b0f14;
   --surface-2: #12171f;
-  --surface-3: #171d27;
+  --surface-3: #1a212b;
   --ink: #f4f6f8;
-  --ink-muted: #9aa4b2;
+  --ink-muted: #98a2b1;
   --brand: #10b981;
   --brand-ink: #04140d;
+  --danger: #f87171;
+  --warn: #fbbf24;
+  --danger-surface: #2a1416;
+  --warn-surface: #2a2210;
+
+  /* Legacy role names kept so nothing downstream breaks. */
+  --background: 213 29% 6%;
+  --foreground: 210 40% 98%;
+  --card: 215 25% 10%;
+  --card-foreground: 210 40% 98%;
+  --primary: 160 84% 39%;
+  --primary-foreground: 213 29% 6%;
+  --secondary: 215 25% 14%;
+  --secondary-foreground: 210 40% 98%;
+  --muted: 215 25% 13%;
+  --muted-foreground: 213 15% 65%;
+  --accent: 160 84% 39%;
+  --accent-foreground: 213 29% 6%;
+  --destructive: 0 84% 71%;
+  --destructive-foreground: 213 29% 6%;
+  --border: 215 25% 16%;
+  --input: 215 25% 14%;
+  --ring: 160 84% 39%;
+  --radius: 0.5rem;
+  --surface: 215 25% 11%;
+  --surface-hover: 215 25% 14%;
 
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
   --ease-soft: cubic-bezier(0.33, 1, 0.68, 1);
@@ -67,7 +72,7 @@
   --color-surface: hsl(var(--surface));
   --color-surface-hover: hsl(var(--surface-hover));
   --font-sans: "General Sans", ui-sans-serif, system-ui, sans-serif;
-  --font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, monospace; /* taste-skill-ignore: for real <code> blocks only */
 }
 
 body {
@@ -86,6 +91,26 @@ body {
 
 .text-balance {
   text-wrap: balance;
+}
+
+/* Signature move: the live indicator on the tunnel mouth breathes, so an
+   online tunnel is visibly alive without a spinner. Transform only. */
+@media (prefers-reduced-motion: no-preference) {
+  .arch-live {
+    animation: arch-live 2.4s var(--ease-soft) infinite;
+  }
+}
+
+@keyframes arch-live {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.9);
+    opacity: 0.35;
+  }
 }
 
 /* Section entrances. Hidden state only applies under html.js, so no-JS users

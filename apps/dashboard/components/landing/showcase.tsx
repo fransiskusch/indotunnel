@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { useReveal } from "@/components/landing/motion";
+import { useReveal, useSwap } from "@/components/landing/motion";
 
 interface RequestRow {
   method: "GET" | "POST";
@@ -62,8 +62,10 @@ const ROWS: RequestRow[] = [
 
 export function Showcase() {
   const ref = useRef<HTMLElement>(null);
+  const stage = useRef<HTMLDivElement>(null);
   const [active, setActive] = useState(0);
   useReveal(ref, "[data-rise]");
+  useSwap(stage, active);
 
   const row = ROWS[active];
 
@@ -124,6 +126,7 @@ export function Showcase() {
           >
             <div className="px-6 pb-6 pt-16 sm:px-10 sm:pb-10 sm:pt-20">
               <div
+                ref={stage}
                 data-ui
                 className="rounded-md p-5"
                 style={{ backgroundColor: "var(--surface-3)" }}

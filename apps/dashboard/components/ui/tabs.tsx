@@ -13,21 +13,29 @@ export function Tabs({
   const [active, setActive] = React.useState(tabs[0]);
   return (
     <div>
-      <div className="inline-flex h-9 items-center justify-center rounded-lg bg-muted p-1 text-muted-foreground">
+      <div
+        className="inline-flex items-center gap-1 rounded-md p-1"
+        style={{ backgroundColor: "var(--surface-3)" }}
+        role="tablist"
+      >
         {tabs.map((t) => (
           <button
             key={t}
+            role="tab"
+            aria-selected={active === t}
             onClick={() => setActive(t)}
             className={cn(
-              "inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1 text-sm font-medium transition-all",
-              active === t && "bg-background text-foreground shadow"
+              "inline-flex items-center justify-center whitespace-nowrap rounded px-3.5 py-1.5 text-[15px] font-medium transition-colors",
+              active === t
+                ? "bg-[color:var(--ink)] text-[color:var(--bg)]"
+                : "text-[color:var(--ink-muted)] hover:text-[color:var(--ink)]",
             )}
           >
             {t}
           </button>
         ))}
       </div>
-      <div className="mt-4">{children(active)}</div>
+      <div className="mt-6">{children(active)}</div>
     </div>
   );
 }

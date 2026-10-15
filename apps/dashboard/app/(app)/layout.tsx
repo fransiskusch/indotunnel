@@ -14,10 +14,10 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   }
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-svh">
       <Nav />
       <LiveRefresher />
-      <main className="mx-auto max-w-5xl px-4 py-8">{children}</main>
+      <main className="mx-auto max-w-[1400px] px-5 py-12 sm:px-8 sm:py-16">{children}</main>
     </div>
   );
 }

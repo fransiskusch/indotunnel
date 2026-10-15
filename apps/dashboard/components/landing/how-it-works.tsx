@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { useReveal } from "@/components/landing/motion";
+import { useReveal, usePanel } from "@/components/landing/motion";
 
 interface Step {
   id: string;
@@ -35,6 +35,73 @@ const STEPS: Step[] = [
   },
 ];
 
+function Step({
+  step,
+  open,
+  onOpen,
+}: {
+  step: Step;
+  open: boolean;
+  onOpen: () => void;
+}) {
+  const panel = useRef<HTMLDivElement>(null);
+  usePanel(panel, open);
+
+  return (
+    <div
+      data-rise
+      className="overflow-hidden rounded-md lg:transition-[flex-grow]"
+      style={{
+        backgroundColor: step.tone,
+        flexGrow: open ? 3 : 1,
+        flexBasis: 0,
+        transitionDuration: "var(--t-ui)",
+        transitionTimingFunction: "var(--ease-out)",
+      }}
+    >
+      <button
+        type="button"
+        onClick={onOpen}
+        aria-expanded={open}
+        aria-controls={`${step.id}-panel`}
+        className="flex w-full items-center justify-between px-6 py-5 text-left lg:h-full lg:flex-col lg:items-start lg:justify-end lg:gap-6"
+      >
+        <span className="text-[18px] font-medium text-[color:var(--ink)]">{step.name}</span>
+        <span className="text-[13px] text-[color:var(--ink-muted)] lg:hidden" aria-hidden>
+          {open ? "Close" : "Open"}
+        </span>
+      </button>
+
+      <div
+        id={`${step.id}-panel`}
+        ref={panel}
+        className="grid"
+        style={{ gridTemplateRows: open ? "1fr" : "0fr" }}
+        aria-hidden={!open}
+        inert={!open}
+      >
+        <div
+          className="overflow-hidden"
+          style={{ visibility: open ? "visible" : "hidden" }}
+        >
+          <p
+            className="max-w-[46ch] px-6 pb-6 text-[color:var(--ink-muted)]"
+            style={{ fontSize: "var(--step-body)" }}
+          >
+            {step.body} Run it with{" "}
+            <code
+              className="rounded px-1.5 py-0.5 text-[color:var(--ink)]"
+              style={{ backgroundColor: "var(--bg)" }}
+            >
+              {step.command}
+            </code>
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function HowItWorks() {
   const ref = useRef<HTMLElement>(null);
   const [openId, setOpenId] = useState(STEPS[0].id);
@@ -66,62 +133,14 @@ export function HowItWorks() {
       </div>
 
       <div className="mt-16 flex flex-col gap-2 lg:flex-row lg:gap-0">
-        {STEPS.map((step) => {
-          const open = step.id === openId;
-          return (
-            <div
-              key={step.id}
-              data-rise
-              className="overflow-hidden rounded-md lg:transition-[flex-grow]"
-              style={{
-                backgroundColor: step.tone,
-                flexGrow: open ? 3 : 1,
-                flexBasis: 0,
-                transitionDuration: "var(--t-ui)",
-                transitionTimingFunction: "var(--ease-out)",
-              }}
-            >
-              <button
-                type="button"
-                onClick={() => setOpenId(step.id)}
-                aria-expanded={open}
-                aria-controls={`${step.id}-panel`}
-                className="flex w-full items-center justify-between px-6 py-5 text-left lg:h-full lg:flex-col lg:items-start lg:justify-end lg:gap-6"
-              >
-                <span
-                  className="text-[18px] font-medium text-[color:var(--ink)]"
-                >
-                  {step.name}
-                </span>
-                <span
-                  className="text-[13px] text-[color:var(--ink-muted)] lg:hidden"
-                  aria-hidden
-                >
-                  {open ? "Close" : "Open"}
-                </span>
-              </button>
-
-              <div
-                id={`${step.id}-panel`}
-                hidden={!open}
-                className="px-6 pb-6"
-              >
-                <p
-                  className="max-w-[46ch] text-[color:var(--ink-muted)]"
-                  style={{ fontSize: "var(--step-body)" }}
-                >
-                  {step.body} Run it with{" "}
-                  <code
-                    className="rounded px-1.5 py-0.5 text-[color:var(--ink)]"
-                    style={{ backgroundColor: "var(--bg)" }}
-                  >
-                    {step.command}
-                  </code>
-                </p>
-              </div>
-            </div>
-          );
-        })}
+        {STEPS.map((step) => (
+          <Step
+            key={step.id}
+            step={step}
+            open={step.id === openId}
+            onOpen={() => setOpenId(step.id)}
+          />
+        ))}
       </div>
     </section>
   );

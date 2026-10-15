@@ -1,5 +1,5 @@
 import { DeviceActivationForm } from "@/components/device-activation-form";
-import { Terminal } from "lucide-react";
+import { Reveal } from "@/components/reveal";
 
 export const dynamic = "force-dynamic";
 
@@ -11,15 +11,23 @@ export default async function ActivatePage({ searchParams }: ActivatePageProps) 
   const { code } = await searchParams;
 
   return (
-    <div className="space-y-6 pt-6">
-      <div className="flex flex-col items-center justify-center text-center space-y-1">
-        <div className="flex items-center gap-2 text-xs font-mono text-emerald-400">
-          <Terminal className="h-3.5 w-3.5" /> DEVICE AUTHENTICATION
-        </div>
-        <h1 className="text-2xl font-bold tracking-tight text-white">CLI Activation</h1>
+    <Reveal>
+      <div data-rise>
+        <h1
+          className="font-medium leading-[1.02] tracking-[-0.03em] text-[color:var(--ink)]"
+          style={{ fontSize: "var(--step-head)" }}
+        >
+          Authorize the CLI
+        </h1>
+        <p className="mt-4 max-w-[54ch] text-[16px] text-[color:var(--ink-muted)]">
+          A terminal is asking to use your IndoTunnel account. Enter the code it
+          printed to grant it a dedicated key.
+        </p>
       </div>
 
-      <DeviceActivationForm initialCode={code ?? ""} />
-    </div>
+      <div data-rise className="max-w-md">
+        <DeviceActivationForm initialCode={code ?? ""} />
+      </div>
+    </Reveal>
   );
 }

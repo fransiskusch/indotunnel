@@ -5,13 +5,12 @@ import { usePathname, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { logout } from "@/lib/api";
-import { Terminal, BarChart3, Activity, Key } from "lucide-react";
 
 const links = [
-  { href: "/dashboard", label: "Dashboard", icon: Activity },
-  { href: "/requests", label: "Requests", icon: Terminal },
-  { href: "/usage", label: "Usage", icon: BarChart3 },
-  { href: "/settings", label: "Settings", icon: Key },
+  { href: "/dashboard", label: "Dashboard" },
+  { href: "/requests", label: "Requests" },
+  { href: "/usage", label: "Usage" },
+  { href: "/settings", label: "Settings" },
 ];
 
 export function Nav() {
@@ -28,37 +27,31 @@ export function Nav() {
   }
 
   return (
-    <header className="sticky top-0 z-50 border-b border-zinc-800/80 bg-slate-950/80 backdrop-blur-md">
-      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
-        <div className="flex items-center gap-8">
-          <Link href="/" className="flex items-center gap-2.5 group">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 group-hover:border-emerald-400 transition-colors">
-              <Terminal className="h-4 w-4" />
-            </div>
-            <span className="font-mono text-base font-bold tracking-tight text-white flex items-center gap-1.5">
-              IndoTunnel
-              <span className="text-[10px] uppercase font-semibold px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                v1.0
-              </span>
-            </span>
+    <header
+      className="sticky top-0 z-50"
+      style={{ backgroundColor: "var(--bg)" }}
+    >
+      <div className="mx-auto flex h-16 max-w-[1400px] items-center justify-between px-5 sm:px-8">
+        <div className="flex items-center gap-10">
+          <Link href="/" className="text-[18px] font-medium tracking-tight text-[color:var(--ink)]">
+            IndoTunnel
           </Link>
 
-          <nav className="flex items-center gap-1">
+          <nav className="hidden items-center gap-7 md:flex">
             {links.map((l) => {
-              const Icon = l.icon;
               const isActive = pathname === l.href;
               return (
                 <Link
                   key={l.href}
                   href={l.href}
                   className={cn(
-                    "flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded-md transition-all",
+                    "text-[16px] transition-colors",
                     isActive
-                      ? "bg-zinc-800/60 text-emerald-400 border border-zinc-700/50"
-                      : "text-zinc-400 hover:text-white hover:bg-zinc-800/30"
+                      ? "text-[color:var(--ink)]"
+                      : "text-[color:var(--ink-muted)] hover:text-[color:var(--ink)]",
                   )}
+                  style={{ transitionDuration: "var(--t-hover)" }}
                 >
-                  <Icon className={cn("h-4 w-4", isActive ? "text-emerald-400" : "text-zinc-500")} />
                   {l.label}
                 </Link>
               );
@@ -66,23 +59,48 @@ export function Nav() {
           </nav>
         </div>
 
-        <div className="flex items-center gap-3">
-          <Link
-            href="/"
-            className="text-xs text-zinc-400 hover:text-emerald-400 transition-colors hidden sm:inline-block"
-          >
-            Landing Page
-          </Link>
+        <div className="flex items-center gap-4">
           <Button
-            variant="outline"
+            variant="ghost"
             size="sm"
-            className="border-zinc-800 bg-zinc-900/60 text-zinc-300 hover:bg-zinc-800 hover:text-white"
+            className="hidden sm:inline-flex"
             onClick={onLogout}
           >
             Log out
           </Button>
         </div>
       </div>
+
+      {/* Phone navigation: a plain row of links under the wordmark. */}
+      <nav
+        className="flex flex-wrap gap-x-6 gap-y-2 px-5 pb-3 sm:px-8 md:hidden"
+        aria-label="Dashboard sections"
+      >
+        {links.map((l) => {
+          const isActive = pathname === l.href;
+          return (
+            <Link
+              key={l.href}
+              href={l.href}
+              className={cn(
+                "whitespace-nowrap text-[16px] transition-colors",
+                isActive
+                  ? "text-[color:var(--ink)]"
+                  : "text-[color:var(--ink-muted)]",
+              )}
+            >
+              {l.label}
+            </Link>
+          );
+        })}
+        <button
+          type="button"
+          onClick={onLogout}
+          className="whitespace-nowrap text-[16px] text-[color:var(--ink-muted)] sm:hidden"
+        >
+          Log out
+        </button>
+      </nav>
     </header>
   );
 }

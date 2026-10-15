@@ -4,10 +4,8 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { login, signup, ApiError } from "@/lib/api";
 import Link from "next/link";
-import { Terminal, Lock, Mail, ArrowRight } from "lucide-react";
 
 export function AuthForm({ mode }: { mode: "login" | "signup" }) {
   const router = useRouter();
@@ -33,82 +31,72 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
   }
 
   return (
-    <Card className="w-full max-w-md border-zinc-800 bg-slate-950/90 shadow-2xl backdrop-blur-xl">
-      <CardHeader className="text-center pb-2">
-        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 mx-auto mb-3 shadow-[0_0_15px_rgba(16,185,129,0.2)]">
-          <Terminal className="h-5 w-5" />
-        </div>
-        <CardTitle className="text-xl font-bold justify-center text-white">
-          {mode === "signup" ? "Create your account" : "Welcome back"}
-        </CardTitle>
-        <p className="text-xs text-zinc-400 mt-1">
-          {mode === "signup" ? "Get your free IndoTunnel developer account" : "Sign in to access your tunnel gateway & logs"}
-        </p>
-      </CardHeader>
-      <CardContent className="pt-4">
-        <form onSubmit={submit} className="space-y-4">
-          <div className="space-y-1.5">
-            <label className="text-xs font-mono text-zinc-400 flex items-center gap-1.5">
-              <Mail className="h-3.5 w-3.5 text-zinc-500" /> Email address
-            </label>
-            <Input
-              type="email"
-              placeholder="developer@example.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
-          </div>
+    <div className="w-full max-w-sm">
+      <Link href="/" className="text-[18px] font-medium tracking-tight text-[color:var(--ink)]">
+        IndoTunnel
+      </Link>
 
-          <div className="space-y-1.5">
-            <label className="text-xs font-mono text-zinc-400 flex items-center gap-1.5">
-              <Lock className="h-3.5 w-3.5 text-zinc-500" /> Password
-            </label>
-            <Input
-              type="password"
-              placeholder="••••••••••••"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
-          </div>
+      <h1
+        className="mt-8 font-medium leading-[1.05] tracking-[-0.02em] text-[color:var(--ink)]"
+        style={{ fontSize: "var(--step-head)" }}
+      >
+        {mode === "signup" ? "Create your account" : "Sign in"}
+      </h1>
+      <p className="mt-3 text-[16px] text-[color:var(--ink-muted)]">
+        {mode === "signup"
+          ? "Free to start. Your first tunnel is one command away."
+          : "Pick up where you left off."}
+      </p>
 
-          {error && (
-            <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 text-xs font-mono">
-              {error}
-            </div>
-          )}
+      <form onSubmit={submit} className="mt-8 space-y-5">
+        <label className="block text-[15px] font-medium text-[color:var(--ink)]">
+          Email
+          <Input
+            type="email"
+            placeholder="developer@example.com"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="mt-2"
+            required
+          />
+        </label>
 
-          <Button type="submit" className="w-full mt-2" disabled={busy}>
-            {busy ? (
-              "Authenticating…"
-            ) : (
-              <span className="flex items-center justify-center gap-2">
-                {mode === "signup" ? "Create Account" : "Sign In"}
-                <ArrowRight className="h-4 w-4" />
-              </span>
-            )}
-          </Button>
-        </form>
+        <label className="block text-[15px] font-medium text-[color:var(--ink)]">
+          Password
+          <Input
+            type="password"
+            placeholder="••••••••••••"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="mt-2"
+            required
+          />
+        </label>
 
-        <p className="mt-6 text-center text-xs text-zinc-400">
-          {mode === "signup" ? (
-            <>
-              Already have an account?{" "}
-              <Link href="/login" className="text-emerald-400 font-semibold hover:underline">
-                Sign in
-              </Link>
-            </>
-          ) : (
-            <>
-              Don't have an account?{" "}
-              <Link href="/signup" className="text-emerald-400 font-semibold hover:underline">
-                Create one
-              </Link>
-            </>
-          )}
-        </p>
-      </CardContent>
-    </Card>
+        {error && <p className="text-[15px] text-[color:var(--danger)]">{error}</p>}
+
+        <Button type="submit" className="w-full" disabled={busy}>
+          {busy ? "Working…" : mode === "signup" ? "Create account" : "Sign in"}
+        </Button>
+      </form>
+
+      <p className="mt-6 text-[15px] text-[color:var(--ink-muted)]">
+        {mode === "signup" ? (
+          <>
+            Already have an account?{" "}
+            <Link href="/login" className="text-[color:var(--ink)] underline underline-offset-4">
+              Sign in
+            </Link>
+          </>
+        ) : (
+          <>
+            No account yet?{" "}
+            <Link href="/signup" className="text-[color:var(--ink)] underline underline-offset-4">
+              Create one
+            </Link>
+          </>
+        )}
+      </p>
+    </div>
   );
 }

@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
+import { gsap, useGSAP } from "@/components/landing/motion";
 
 interface RequestItem {
   id: string;
@@ -19,6 +20,7 @@ const STATUS_TEXT: Record<number, string> = {
 };
 
 export function TerminalDemo() {
+  const rowsRef = useRef<HTMLDivElement>(null);
   const [copied, setCopied] = useState(false);
   const [activeTab, setActiveTab] = useState<"cli" | "inspector">("cli");
   const [requests, setRequests] = useState<RequestItem[]>([
@@ -26,6 +28,25 @@ export function TerminalDemo() {
     { id: "req-2", time: "14:02:15", method: "GET", path: "/healthz", status: 200, duration: "4ms" },
     { id: "req-3", time: "14:02:22", method: "POST", path: "/api/auth/callback", status: 201, duration: "32ms" },
   ]);
+
+  // A new row slides in from above the list, so the visitor sees the request
+  // arrive rather than the list blinking.
+  useGSAP(
+    () => {
+      const mm = gsap.matchMedia();
+      mm.add("(prefers-reduced-motion: no-preference)", () => {
+        const first = rowsRef.current?.firstElementChild;
+        if (!first) return;
+        gsap.fromTo(
+          first,
+          { opacity: 0, y: -8 },
+          { opacity: 1, y: 0, duration: 0.32, ease: "power2.out" },
+        );
+      });
+      return () => mm.revert();
+    },
+    { scope: rowsRef, dependencies: [requests[0]?.id], revertOnUpdate: false },
+  );
 
   function simulateNewRequest() {
     const methods: Array<"GET" | "POST" | "PUT"> = ["GET", "POST", "PUT"];
@@ -120,7 +141,7 @@ export function TerminalDemo() {
               </p>
             </div>
 
-            <div className="space-y-2 pt-4" style={{ backgroundColor: "transparent" }}>
+            <div ref={rowsRef} className="space-y-2 pt-4" style={{ backgroundColor: "transparent" }}>
               <div className="flex items-center justify-between text-[13px] text-[color:var(--ink-muted)]">
                 <span>Incoming traffic</span>
                 <button
@@ -135,17 +156,17 @@ export function TerminalDemo() {
               {requests.map((r) => (
                 <div
                   key={r.id}
-                  className="flex items-center justify-between rounded-md px-3 py-2 text-[13px]"
+                  className="flex items-center justify-between gap-3 rounded-md px-3 py-2 text-[13px]"
                   style={{ backgroundColor: "var(--surface-3)" }}
                 >
-                  <div className="flex items-center gap-3">
-                    <span className="text-[color:var(--ink-muted)]">{r.time}</span>
-                    <span className="w-11 font-medium text-[color:var(--ink)]">
+                  <div className="flex min-w-0 items-center gap-3">
+                    <span className="shrink-0 text-[color:var(--ink-muted)]">{r.time}</span>
+                    <span className="w-11 shrink-0 font-medium text-[color:var(--ink)]">
                       {r.method}
                     </span>
-                    <span className="text-[color:var(--ink)]">{r.path}</span>
+                    <span className="truncate text-[color:var(--ink)]">{r.path}</span>
                   </div>
-                  <div className="flex items-center gap-3">
+                  <div className="flex shrink-0 items-center gap-3">
                     <span
                       className="font-medium"
                       style={{

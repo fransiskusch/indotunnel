@@ -4,16 +4,17 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Tabs } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
 import Link from "next/link";
-import { ArrowLeft, Copy, Check, Terminal, Code2 } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import type { RequestLog } from "@/lib/api";
 
 function Row({ k, v }: { k: string; v: React.ReactNode }) {
   return (
-    <div className="flex justify-between gap-4 border-b border-zinc-800/60 py-2.5 text-sm last:border-0">
-      <span className="text-zinc-400 font-sans">{k}</span>
-      <span className="font-mono text-right text-zinc-100">{v}</span>
+    <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1 py-3">
+      <span className="text-[15px] text-[color:var(--ink-muted)]">{k}</span>
+      <span className="break-all text-right text-[15px] text-[color:var(--ink)] [font-variant-numeric:tabular-nums]">
+        {v}
+      </span>
     </div>
   );
 }
@@ -30,91 +31,100 @@ export function RequestDetail({ request, tunnelId }: { request: RequestLog; tunn
 
   const size = request.request_bytes + request.response_bytes;
   const isSuccess = request.status_code < 400;
+  const isWarn = request.status_code >= 400 && request.status_code < 500;
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center gap-3">
+    <div className="space-y-8">
+      <div>
         <Link
           href={`/requests?tunnel=${tunnelId}`}
-          className="flex items-center justify-center h-8 w-8 rounded-lg border border-zinc-800 bg-zinc-900 text-zinc-400 hover:text-white transition-colors"
+          className="inline-flex items-center gap-2 text-[15px] text-[color:var(--ink-muted)] transition-colors hover:text-[color:var(--ink)]"
         >
-          <ArrowLeft className="h-4 w-4" />
+          <ArrowLeft className="h-4 w-4" /> All requests
         </Link>
 
-        <div className="flex flex-wrap items-center gap-3">
-          <Badge variant={isSuccess ? "success" : "destructive"}>
+        <div className="mt-6 flex flex-wrap items-center gap-3">
+          <span
+            className="text-[13px] font-medium"
+            style={{
+              color: isSuccess
+                ? "var(--brand)"
+                : isWarn
+                  ? "var(--warn)"
+                  : "var(--danger)",
+            }}
+          >
             {request.status_code}
-          </Badge>
-          <span className="font-mono font-bold text-lg text-emerald-400">{request.method}</span>
-          <span className="font-mono text-base text-zinc-200">{request.path}</span>
+          </span>
+          <span className="text-[17px] font-medium text-[color:var(--ink)]">{request.method}</span>
+          <span className="break-all text-[17px] text-[color:var(--ink-muted)]">{request.path}</span>
         </div>
 
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={copyCurl}
-          className="ml-auto border-zinc-800 bg-zinc-900/80 text-zinc-300 hover:bg-zinc-800 hover:text-white font-mono text-xs"
-        >
-          {copied ? (
-            <>
-              <Check className="h-3.5 w-3.5 text-emerald-400 mr-1.5" /> Copied cURL
-            </>
-          ) : (
-            <>
-              <Copy className="h-3.5 w-3.5 mr-1.5" /> Copy as cURL
-            </>
-          )}
-        </Button>
+        <div className="mt-6">
+          <Button variant="secondary" size="sm" onClick={copyCurl}>
+            {copied ? "Copied" : "Copy as cURL"}
+          </Button>
+        </div>
       </div>
 
-      <Card>
-        <CardContent className="p-6">
-          <Tabs tabs={["Overview", "Headers", "Query", "Response"]}>
-            {(active) => {
-              if (active === "Overview") {
-                return (
-                  <div className="space-y-1">
-                    <Row k="Request ID" v={request.request_id} />
-                    <Row k="Tunnel ID" v={tunnelId} />
-                    <Row k="Host" v={request.host} />
-                    <Row k="Time" v={new Date(request.started_at).toLocaleString()} />
-                    <Row k="Status" v={<Badge variant={isSuccess ? "success" : "destructive"}>{request.status_code}</Badge>} />
-                    <Row k="Duration" v={`${request.duration_ms} ms`} />
-                    <Row k="Total Size" v={`${size} bytes`} />
-                  </div>
-                );
-              }
-              if (active === "Headers") {
-                return (
-                  <div className="space-y-1">
-                    <Row k="Host" v={request.host} />
-                    <Row k="Method" v={request.method} />
-                    <Row k="Path" v={request.path} />
-                    <Row k="Request Bytes" v={`${request.request_bytes} B`} />
-                  </div>
-                );
-              }
-              if (active === "Query") {
-                const q = request.path.includes("?") ? request.path.split("?")[1] : "";
-                return q ? (
-                  <pre className="p-4 rounded-lg bg-zinc-950 text-cyan-300 font-mono text-xs overflow-x-auto border border-zinc-800">
-                    {q}
-                  </pre>
-                ) : (
-                  <p className="text-xs text-zinc-500 py-4 font-mono">No query parameters attached to this request.</p>
-                );
-              }
+      <div className="rounded-md bg-[color:var(--surface-2)] p-6 sm:p-8">
+        <Tabs tabs={["Overview", "Headers", "Query", "Response"]}>
+          {(active) => {
+            if (active === "Overview") {
               return (
-                <div className="space-y-1">
-                  <Row k="HTTP Status" v={request.status_code} />
-                  <Row k="Response Payload Size" v={`${request.response_bytes} bytes`} />
-                  <Row k="Execution Time" v={`${request.duration_ms} ms`} />
+                <div>
+                  <Row k="Request ID" v={request.request_id} />
+                  <Row k="Tunnel ID" v={tunnelId} />
+                  <Row k="Host" v={request.host} />
+                  <Row k="Time" v={new Date(request.started_at).toLocaleString()} />
+                  <Row
+                    k="Status"
+                    v={
+                      <Badge variant={isSuccess ? "success" : isWarn ? "warn" : "destructive"}>
+                        {request.status_code}
+                      </Badge>
+                    }
+                  />
+                  <Row k="Duration" v={`${request.duration_ms} ms`} />
+                  <Row k="Total size" v={`${size} bytes`} />
                 </div>
               );
-            }}
-          </Tabs>
-        </CardContent>
-      </Card>
+            }
+            if (active === "Headers") {
+              return (
+                <div>
+                  <Row k="Host" v={request.host} />
+                  <Row k="Method" v={request.method} />
+                  <Row k="Path" v={request.path} />
+                  <Row k="Request bytes" v={`${request.request_bytes} B`} />
+                </div>
+              );
+            }
+            if (active === "Query") {
+              const q = request.path.includes("?") ? request.path.split("?")[1] : "";
+              return q ? (
+                <pre
+                  className="overflow-x-auto rounded-md p-4 text-[14px] text-[color:var(--ink)]"
+                  style={{ backgroundColor: "var(--bg)" }}
+                >
+                  <code>{q}</code>
+                </pre>
+              ) : (
+                <p className="py-2 text-[16px] text-[color:var(--ink-muted)]">
+                  No query parameters on this request.
+                </p>
+              );
+            }
+            return (
+              <div>
+                <Row k="HTTP status" v={request.status_code} />
+                <Row k="Response payload" v={`${request.response_bytes} bytes`} />
+                <Row k="Execution time" v={`${request.duration_ms} ms`} />
+              </div>
+            );
+          }}
+        </Tabs>
+      </div>
     </div>
   );
 }

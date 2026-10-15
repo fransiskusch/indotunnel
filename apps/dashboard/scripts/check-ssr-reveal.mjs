@@ -1,13 +1,36 @@
-// Self-check: the server-rendered landing HTML must not ship content hidden
-// behind an inline opacity:0 (that strands reduced-motion and no-JS users on a
-// blank page). Run after `npm run build`.
+// Self-check: the landing page must render its content with no JavaScript and
+// no motion. The GSAP layer may only hide things when html.js is present, and
+// the headline must never depend on a stylesheet rule to become visible.
 import { readFileSync } from "node:fs";
 
 const html = readFileSync(new URL("../.next/server/app/index.html", import.meta.url), "utf8");
-const hidden = (html.match(/opacity:\s*0(?!\.)/g) || []).length;
 
-if (hidden > 0) {
-  console.error(`FAIL: ${hidden} server-rendered element(s) hidden with opacity:0`);
-  process.exit(1);
+const checks = [
+  {
+    name: "no server-rendered content hidden with inline opacity:0",
+    ok: !/opacity:\s*0(?!\.)/.test(html),
+  },
+  {
+    name: "no server-rendered content translated out of its mask",
+    ok: !/translateY\(105%\)/.test(html),
+  },
+  {
+    name: "the hero headline is present in the markup",
+    ok: html.includes("Expose localhost") && html.includes("to the internet"),
+  },
+  {
+    name: "open accordion panels ship visible",
+    ok: html.includes("grid-template-rows:1fr") || html.includes('grid-template-rows: 1fr'),
+  },
+];
+
+let failed = 0;
+for (const c of checks) {
+  if (c.ok) {
+    console.log(`PASS: ${c.name}`);
+  } else {
+    console.error(`FAIL: ${c.name}`);
+    failed++;
+  }
 }
-console.log("PASS: no server-rendered content hidden with opacity:0");
+process.exit(failed ? 1 : 0);
