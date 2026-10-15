@@ -47,7 +47,7 @@ export function SiteHeader() {
           IndoTunnel
         </Link>
 
-        <nav className="hidden items-center gap-8 text-[15px] md:flex">
+        <nav className="hidden items-center gap-8 text-[16px] md:flex">
           {LINKS.map((link) => (
             <a
               key={link.href}
@@ -85,7 +85,6 @@ export function SiteHeader() {
               className="block h-0.5 w-5 bg-[color:var(--ink)] transition-transform"
               style={{
                 transform: open ? "translateY(-4px) rotate(-45deg)" : "none",
-                opacity: open ? 0 : 1,
               }}
             />
           </button>

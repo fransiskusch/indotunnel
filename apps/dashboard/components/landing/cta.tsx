@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
+import Link from "next/link";
 import { useReveal } from "@/components/landing/motion";
 
 export function Cta() {
@@ -44,7 +45,7 @@ export function Cta() {
             style={{ boxShadow: "0 24px 60px -20px rgba(0,0,0,0.45)" }}
           >
             <h3 className="text-[18px] font-semibold">Name your workspace</h3>
-            <p className="mt-1 text-[15px] text-[#6b6b6b]">
+            <p className="mt-1 text-[16px] text-[#6b6b6b]">
               You can rename this later in settings.
             </p>
 
@@ -53,7 +54,7 @@ export function Cta() {
               <input
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="mt-2 w-full rounded-md border border-[#d4d4d4] px-3 py-2 text-[15px] outline-none focus:border-[#111111]"
+                className="mt-2 w-full rounded-md border border-[#d4d4d4] px-3 py-2 text-[16px] outline-none focus-visible:border-[#111111] focus-visible:ring-2 focus-visible:ring-[#111111]/30"
               />
             </label>
 
@@ -71,7 +72,7 @@ export function Cta() {
                     type="button"
                     onClick={() => setScope(option)}
                     aria-pressed={scope === option}
-                    className="flex-1 rounded px-3 py-2 text-[15px] font-medium capitalize transition-colors"
+                    className="flex-1 rounded px-3 py-2 text-[16px] font-medium capitalize transition-colors"
                     style={{
                       backgroundColor: scope === option ? "#111111" : "transparent",
                       color: scope === option ? "#ffffff" : "#6b6b6b",
@@ -83,13 +84,13 @@ export function Cta() {
               </div>
             </div>
 
-            <button
-              type="button"
-              className="mt-6 w-full rounded-md py-3 text-[15px] font-medium text-white transition-transform active:scale-[0.98]"
+            <Link
+              href="/signup"
+              className="mt-6 block w-full rounded-md py-3 text-center text-[16px] font-medium text-white transition-transform active:scale-[0.98]"
               style={{ backgroundColor: "#111111" }}
             >
               Create {scope} workspace
-            </button>
+            </Link>
           </div>
         </div>
       </div>

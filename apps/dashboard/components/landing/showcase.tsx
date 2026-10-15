@@ -1,7 +1,6 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { Arch } from "@/components/landing/arch";
 import { useReveal } from "@/components/landing/motion";
 
 interface RequestRow {
@@ -84,7 +83,7 @@ export function Showcase() {
             Inspect every request
           </h2>
 
-          <ul className="space-y-1">
+          <ul className="space-y-1" role="radiogroup" aria-label="Request">
             {ROWS.map((r, i) => {
               const on = i === active;
               return (
@@ -92,9 +91,10 @@ export function Showcase() {
                   <button
                     type="button"
                     data-rise
+                    role="radio"
+                    aria-checked={on}
                     onClick={() => setActive(i)}
                     onFocus={() => setActive(i)}
-                    aria-pressed={on}
                     className="flex w-full items-center gap-3 py-2 text-left"
                     style={{
                       color: on ? "var(--ink)" : "var(--ink-muted)",
@@ -142,7 +142,7 @@ export function Showcase() {
                 >
                   {row.payload}
                 </pre>
-                <p className="mt-4 text-[15px] text-[color:var(--ink-muted)]">
+                <p className="mt-4 text-[16px] text-[color:var(--ink-muted)]">
                   {row.fact}
                 </p>
               </div>

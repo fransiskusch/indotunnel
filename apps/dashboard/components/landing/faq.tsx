@@ -34,7 +34,7 @@ const CARDS: Card[] = [
     answer:
       "No. Every tunnel gets a random HTTPS subdomain under indotunnel.id with a valid certificate. The Developer and Team plans add reserved subdomains and a custom CNAME.",
     tabLeft: 300,
-    tone: "var(--surface)",
+    tone: "var(--surface-3)",
   },
   {
     topic: "Webhooks",

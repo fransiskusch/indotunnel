@@ -17,7 +17,9 @@ export default function RootLayout({
       <head>
         <script
           dangerouslySetInnerHTML={{
-            __html: "document.documentElement.classList.add('js')",
+            __html:
+              "document.documentElement.classList.add('js');" +
+              "setTimeout(function(){if(!document.documentElement.classList.contains('js-ready')){document.documentElement.classList.remove('js')}},2500)",
           }}
         />
         <link rel="preconnect" href="https://api.fontshare.com" />

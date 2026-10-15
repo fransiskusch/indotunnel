@@ -37,6 +37,7 @@ export function useReveal<T extends HTMLElement>(
             scrollTrigger: { trigger: ref.current, start: "top 80%", once: true },
           },
         );
+        document.documentElement.classList.add("js-ready");
       });
       return () => mm.revert();
     },

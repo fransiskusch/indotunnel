@@ -95,7 +95,7 @@ export function TerminalDemo() {
               className="flex items-center justify-between rounded-md p-3"
               style={{ backgroundColor: "var(--surface-3)" }}
             >
-              <span className="text-[15px] text-[color:var(--ink)]">
+              <span className="text-[16px] text-[color:var(--ink)]">
                 <span className="text-[color:var(--ink-muted)]">$ </span>
                 npx indotunnel 3000
               </span>

@@ -28,7 +28,7 @@ export function Features() {
           >
             Online
           </span>
-          <span className="text-[15px] text-[color:var(--ink-muted)]">
+          <span className="text-[16px] text-[color:var(--ink-muted)]">
             Tunnel live at id-cgk.gateway.indotunnel.id
           </span>
         </div>
@@ -40,7 +40,7 @@ export function Features() {
       span: "lg:col-span-2",
       ui: (
         <div data-ui className="flex items-center justify-between p-6">
-          <span className="text-[15px] text-[color:var(--ink)]">Replay</span>
+          <span className="text-[16px] text-[color:var(--ink)]">Replay</span>
           <span
             className="rounded-md px-3 py-1 text-[13px] font-medium"
             style={{ backgroundColor: "var(--brand)", color: "var(--brand-ink)" }}
@@ -87,7 +87,7 @@ export function Features() {
                 style={{ left: "22px", backgroundColor: "var(--brand-ink)" }}
               />
             </span>
-            <span className="text-[15px] text-[color:var(--ink)]">Bearer</span>
+            <span className="text-[16px] text-[color:var(--ink)]">Bearer</span>
           </div>
         </div>
       ),
@@ -101,7 +101,7 @@ export function Features() {
           <span className="text-4xl font-medium text-[color:var(--ink)]">
             5,000
           </span>
-          <span className="ml-2 text-[15px] text-[color:var(--ink-muted)]">
+          <span className="ml-2 text-[16px] text-[color:var(--ink-muted)]">
             req / day
           </span>
         </div>
@@ -126,7 +126,7 @@ export function Features() {
       span: "lg:col-span-4",
       ui: (
         <div className="p-6">
-          <div className="flex items-center gap-3 text-[15px]">
+          <div className="flex items-center gap-3 text-[16px]">
             <span className="text-[color:var(--ink)]">WebSocket</span>
             <span className="text-[color:var(--ink-muted)]">SSE</span>
             <span className="text-[color:var(--ink-muted)]">HTTP/2</span>
@@ -156,7 +156,7 @@ export function Features() {
             {tile.name && (
               <div className="px-6 pb-6">
                 <p className={`text-[18px] font-medium ${CAP}`}>{tile.name}</p>
-                <p className={`mt-1 text-[15px] ${MUTED}`}>{tile.line}</p>
+                <p className={`mt-1 text-[16px] ${MUTED}`}>{tile.line}</p>
               </div>
             )}
           </div>

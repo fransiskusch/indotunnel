@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { useRef } from "react";
-import { Arch } from "@/components/landing/arch";
 import { TerminalDemo } from "@/components/landing/terminal-demo";
 import { useReveal, useShutter } from "@/components/landing/motion";
 
@@ -40,7 +39,7 @@ export function Hero() {
           <Link
             data-rise
             href="/signup"
-            className="inline-block rounded-md bg-[color:var(--brand)] px-6 py-3 text-[15px] font-medium text-[color:var(--brand-ink)] transition-transform active:scale-[0.97]"
+            className="inline-block rounded-md bg-[color:var(--brand)] px-6 py-3 text-[16px] font-medium text-[color:var(--brand-ink)] transition-transform active:scale-[0.97]"
             style={{ transitionDuration: "var(--t-press)" }}
           >
             Start free

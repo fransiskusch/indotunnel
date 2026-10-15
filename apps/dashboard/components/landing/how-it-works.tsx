@@ -17,7 +17,7 @@ const STEPS: Step[] = [
     name: "Run the CLI",
     body: "No install needed with npx, or install globally via npm. Point it at the port your server listens on.",
     command: "npx indotunnel 3000",
-    tone: "var(--surface-3)",
+    tone: "var(--bg)",
   },
   {
     id: "step-2",
@@ -31,7 +31,7 @@ const STEPS: Step[] = [
     name: "Inspect and replay",
     body: "Open the dashboard to read live traffic, headers and payloads, then replay any request.",
     command: "/dashboard",
-    tone: "var(--surface)",
+    tone: "var(--surface-3)",
   },
 ];
 

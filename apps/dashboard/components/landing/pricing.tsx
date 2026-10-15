@@ -72,7 +72,7 @@ export function Pricing() {
       className="mx-auto max-w-[1600px] px-5 py-28 sm:px-8"
     >
       <div className="grid gap-16 lg:grid-cols-12">
-        <ul className="lg:col-span-6">
+        <ul className="lg:col-span-6" role="radiogroup" aria-label="Plan">
           {PLANS.map((p, i) => {
             const on = i === active;
             return (
@@ -80,9 +80,10 @@ export function Pricing() {
                 <button
                   type="button"
                   data-rise
+                  role="radio"
+                  aria-checked={on}
                   onClick={() => setActive(i)}
                   onFocus={() => setActive(i)}
-                  aria-pressed={on}
                   className="flex items-center gap-4 py-2 text-left leading-[1.1]"
                   style={{
                     color: on ? "var(--ink)" : "var(--ink-muted)",
@@ -154,7 +155,7 @@ export function Pricing() {
               {plan.cta.href ? (
                 <Link
                   href={plan.cta.href}
-                  className="inline-block rounded-md bg-[color:var(--brand)] px-6 py-3 text-[15px] font-medium text-[color:var(--brand-ink)] transition-transform active:scale-[0.97]"
+                  className="inline-block rounded-md bg-[color:var(--brand)] px-6 py-3 text-[16px] font-medium text-[color:var(--brand-ink)] transition-transform active:scale-[0.97]"
                 >
                   {plan.cta.label}
                 </Link>
@@ -162,7 +163,7 @@ export function Pricing() {
                 <button
                   type="button"
                   disabled
-                  className="inline-block cursor-not-allowed rounded-md px-6 py-3 text-[15px] font-medium text-[color:var(--ink-muted)]"
+                  className="inline-block cursor-not-allowed rounded-md px-6 py-3 text-[16px] font-medium text-[color:var(--ink-muted)]"
                   style={{ backgroundColor: "var(--surface-3)" }}
                 >
                   {plan.cta.label}
