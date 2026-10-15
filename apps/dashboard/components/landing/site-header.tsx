@@ -10,6 +10,9 @@ const LINKS = [
   { href: "#faq", label: "FAQ" },
 ];
 
+const FOCUS =
+  "rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--brand)] focus-visible:ring-offset-2 focus-visible:ring-offset-[color:var(--bg)]";
+
 export function SiteHeader() {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -31,90 +34,104 @@ export function SiteHeader() {
     return () => window.removeEventListener("keydown", onKey);
   }, []);
 
+  // Solid ground whenever the panel is open: an opaque menu over a transparent
+  // bar would sit directly on the hero with nothing separating them.
+  const solid = scrolled || open;
+
   return (
-    <header
-      className="sticky top-0 z-50 transition-colors"
-      style={{
-        backgroundColor: scrolled ? "var(--bg)" : "transparent",
-        transitionDuration: "var(--t-ui)",
-      }}
-    >
-      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-5 sm:px-8">
-        <Link
-          href="/"
-          className="text-lg font-medium tracking-tight text-[color:var(--ink)]"
-        >
-          IndoTunnel
-        </Link>
-
-        <nav className="hidden items-center gap-8 text-[16px] md:flex">
-          {LINKS.map((link) => (
-            <a
-              key={link.href}
-              href={link.href}
-              className="text-[color:var(--ink-muted)] transition-colors hover:text-[color:var(--ink)]"
-              style={{ transitionDuration: "var(--t-hover)" }}
-            >
-              {link.label}
-            </a>
-          ))}
-        </nav>
-
-        <div className="flex items-center gap-4">
-          <Link
-            href="/dashboard"
-            className="hidden rounded-md bg-[color:var(--brand)] px-4 py-2 text-sm font-medium text-[color:var(--brand-ink)] transition-transform active:scale-[0.97] sm:block"
-            style={{ transitionDuration: "var(--t-press)" }}
-          >
-            Dashboard
-          </Link>
-
-          <button
-            type="button"
-            onClick={() => setOpen((v) => !v)}
-            aria-expanded={open}
-            aria-controls="mobile-nav"
-            aria-label={open ? "Close menu" : "Open menu"}
-            className="flex h-9 w-9 flex-col items-center justify-center gap-1.5 md:hidden"
-          >
-            <span
-              className="block h-0.5 w-5 bg-[color:var(--ink)] transition-transform"
-              style={{ transform: open ? "translateY(4px) rotate(45deg)" : "none" }}
-            />
-            <span
-              className="block h-0.5 w-5 bg-[color:var(--ink)] transition-transform"
-              style={{
-                transform: open ? "translateY(-4px) rotate(-45deg)" : "none",
-              }}
-            />
-          </button>
-        </div>
-      </div>
-
+    <header className="sticky top-0 z-50">
       <div
-        id="mobile-nav"
-        hidden={!open}
-        className="bg-[color:var(--bg)] md:hidden"
+        className="relative transition-colors"
+        style={{
+          backgroundColor: solid ? "var(--bg)" : "transparent",
+          transitionDuration: "var(--t-ui)",
+        }}
       >
-        <nav className="mx-auto flex max-w-6xl flex-col px-5 py-4 sm:px-8">
-          {LINKS.map((link) => (
-            <a
-              key={link.href}
-              href={link.href}
-              onClick={() => setOpen(false)}
-              className="py-3 text-base text-[color:var(--ink-muted)] transition-colors hover:text-[color:var(--ink)]"
-            >
-              {link.label}
-            </a>
-          ))}
+        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-5 sm:px-8">
           <Link
-            href="/dashboard"
-            onClick={() => setOpen(false)}
-            className="mt-3 rounded-md bg-[color:var(--brand)] px-4 py-3 text-center text-sm font-medium text-[color:var(--brand-ink)]"
+            href="/"
+            className="text-lg font-medium tracking-tight text-[color:var(--ink)]"
           >
-            Dashboard
+            IndoTunnel
           </Link>
-        </nav>
+
+          <div className="flex items-center gap-2 sm:gap-4">
+            <nav className="hidden items-center gap-8 text-[16px] md:flex">
+              {LINKS.map((link) => (
+                <a
+                  key={link.href}
+                  href={link.href}
+                  className={
+                    "text-[color:var(--ink-muted)] transition-colors hover:text-[color:var(--ink)] " +
+                    FOCUS
+                  }
+                  style={{ transitionDuration: "var(--t-hover)" }}
+                >
+                  {link.label}
+                </a>
+              ))}
+            </nav>
+
+            <Link
+              href="/dashboard"
+              className="rounded-md bg-[color:var(--brand)] px-4 py-2 text-sm font-medium text-[color:var(--brand-ink)] transition-transform active:scale-[0.97]"
+              style={{ transitionDuration: "var(--t-press)" }}
+            >
+              Dashboard
+            </Link>
+
+            <button
+              type="button"
+              onClick={() => setOpen((v) => !v)}
+              aria-expanded={open}
+              aria-controls="mobile-nav"
+              aria-label={open ? "Close menu" : "Open menu"}
+              className="-mr-2 flex h-11 w-11 flex-col items-center justify-center gap-[5px] md:hidden"
+            >
+              <span
+                className="block h-[1.5px] w-5 bg-[color:var(--ink)] transition-transform"
+                style={{
+                  transitionDuration: "var(--t-ui)",
+                  transform: open ? "translateY(3.25px) rotate(45deg)" : "none",
+                }}
+              />
+              <span
+                className="block h-[1.5px] w-5 bg-[color:var(--ink)] transition-transform"
+                style={{
+                  transitionDuration: "var(--t-ui)",
+                  transform: open ? "translateY(-3.25px) rotate(-45deg)" : "none",
+                }}
+              />
+            </button>
+          </div>
+        </div>
+
+        {/* Overlays the page instead of joining the flow, so opening the menu
+            never shifts the content below it. Positioning and the closed
+            state live in CSS behind the .js gate: without JS the panel stays
+            in the flow and visible, so the links are still reachable. */}
+        <div
+          id="mobile-nav"
+          data-open={open}
+          className="nav-panel md:hidden"
+          style={{ backgroundColor: "var(--surface-2)" }}
+        >
+          <nav className="mx-auto max-w-6xl px-5 py-3 sm:px-8">
+            {LINKS.map((link) => (
+              <a
+                key={link.href}
+                href={link.href}
+                onClick={() => setOpen(false)}
+                className={
+                  "flex min-h-11 items-center text-[16px] text-[color:var(--ink-muted)] transition-colors hover:text-[color:var(--ink)] " +
+                  FOCUS
+                }
+              >
+                {link.label}
+              </a>
+            ))}
+          </nav>
+        </div>
       </div>
     </header>
   );

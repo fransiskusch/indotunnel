@@ -13,6 +13,9 @@ const links = [
   { href: "/settings", label: "Settings" },
 ];
 
+const FOCUS =
+  "rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--brand)] focus-visible:ring-offset-2 focus-visible:ring-offset-[color:var(--bg)]";
+
 export function Nav() {
   const pathname = usePathname();
   const router = useRouter();
@@ -27,54 +30,53 @@ export function Nav() {
   }
 
   return (
-    <header
-      className="sticky top-0 z-50"
-      style={{ backgroundColor: "var(--bg)" }}
-    >
-      <div className="mx-auto flex h-16 max-w-[1400px] items-center justify-between px-5 sm:px-8">
-        <div className="flex items-center gap-10">
-          <Link href="/" className="text-[18px] font-medium tracking-tight text-[color:var(--ink)]">
-            IndoTunnel
-          </Link>
+    <header className="sticky top-0 z-50" style={{ backgroundColor: "var(--bg)" }}>
+      <div className="mx-auto flex h-14 max-w-[1400px] items-center justify-between px-5 sm:px-8 md:h-16">
+        <Link
+          href="/"
+          className={cn(
+            "text-[18px] font-medium tracking-tight text-[color:var(--ink)]",
+            FOCUS,
+          )}
+        >
+          IndoTunnel
+        </Link>
 
-          <nav className="hidden items-center gap-7 md:flex">
-            {links.map((l) => {
-              const isActive = pathname === l.href;
-              return (
-                <Link
-                  key={l.href}
-                  href={l.href}
-                  className={cn(
-                    "text-[16px] transition-colors",
-                    isActive
-                      ? "text-[color:var(--ink)]"
-                      : "text-[color:var(--ink-muted)] hover:text-[color:var(--ink)]",
-                  )}
-                  style={{ transitionDuration: "var(--t-hover)" }}
-                >
-                  {l.label}
-                </Link>
-              );
-            })}
-          </nav>
-        </div>
+        <nav className="hidden items-center gap-7 md:flex" aria-label="Sections">
+          {links.map((l) => {
+            const isActive = pathname === l.href;
+            return (
+              <Link
+                key={l.href}
+                href={l.href}
+                aria-current={isActive ? "page" : undefined}
+                className={cn(
+                  "text-[16px] transition-colors",
+                  isActive
+                    ? "text-[color:var(--ink)]"
+                    : "text-[color:var(--ink-muted)] hover:text-[color:var(--ink)]",
+                  FOCUS,
+                )}
+                style={{ transitionDuration: "var(--t-hover)" }}
+              >
+                {l.label}
+              </Link>
+            );
+          })}
+        </nav>
 
-        <div className="flex items-center gap-4">
-          <Button
-            variant="ghost"
-            size="sm"
-            className="hidden sm:inline-flex"
-            onClick={onLogout}
-          >
-            Log out
-          </Button>
-        </div>
+        {/* The one action, in the bar at every width. Keeping it here is what
+            lets the phone row below stay a single line. */}
+        <Button variant="ghost" size="sm" onClick={onLogout}>
+          Log out
+        </Button>
       </div>
 
-      {/* Phone navigation: a plain row of links under the wordmark. */}
+      {/* Phone navigation: one row of section links under the bar. One line, so
+          the sticky header keeps its height on a small screen. */}
       <nav
-        className="flex flex-wrap gap-x-6 gap-y-2 px-5 pb-3 sm:px-8 md:hidden"
-        aria-label="Dashboard sections"
+        className="mx-auto flex max-w-[1400px] items-center gap-4 px-5 pb-2.5 sm:px-8 md:hidden"
+        aria-label="Sections"
       >
         {links.map((l) => {
           const isActive = pathname === l.href;
@@ -82,24 +84,19 @@ export function Nav() {
             <Link
               key={l.href}
               href={l.href}
+              aria-current={isActive ? "page" : undefined}
               className={cn(
-                "whitespace-nowrap text-[16px] transition-colors",
+                "whitespace-nowrap text-[15px] transition-colors",
                 isActive
                   ? "text-[color:var(--ink)]"
                   : "text-[color:var(--ink-muted)]",
+                FOCUS,
               )}
             >
               {l.label}
             </Link>
           );
         })}
-        <button
-          type="button"
-          onClick={onLogout}
-          className="whitespace-nowrap text-[16px] text-[color:var(--ink-muted)] sm:hidden"
-        >
-          Log out
-        </button>
       </nav>
     </header>
   );

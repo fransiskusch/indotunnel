@@ -93,6 +93,28 @@ body {
   text-wrap: balance;
 }
 
+/* Mobile menu. Without JS the panel stays in the flow and simply visible, so
+   the links remain reachable; with JS it becomes an overlay under the bar that
+   opens on demand, so opening it never shifts the page. */
+@media (max-width: 767px) {
+  .js .nav-panel {
+    position: absolute;
+    inset-inline: 0;
+    top: 100%;
+    transition:
+      opacity var(--t-ui) var(--ease-out),
+      transform var(--t-ui) var(--ease-out),
+      visibility var(--t-ui);
+  }
+
+  .js .nav-panel[data-open="false"] {
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-8px);
+    pointer-events: none;
+  }
+}
+
 /* Signature move: the live indicator on the tunnel mouth breathes, so an
    online tunnel is visibly alive without a spinner. Transform only. */
 @media (prefers-reduced-motion: no-preference) {
