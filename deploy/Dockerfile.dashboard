@@ -1,5 +1,5 @@
 # Build stage
-FROM node:24-alpine AS build
+FROM node:24.22.1-alpine AS build
 WORKDIR /app
 # The Next rewrite destination is resolved at build time, so the API base must
 # be known here (in compose this is http://server:8081).
@@ -11,7 +11,7 @@ COPY apps/dashboard/ ./
 RUN npm run build
 
 # Runtime stage
-FROM node:24-alpine
+FROM node:24.22.1-alpine
 WORKDIR /app
 ENV NODE_ENV=production
 COPY --from=build /app/package.json /app/package-lock.json ./
