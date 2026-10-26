@@ -181,7 +181,7 @@ func TestCreateTunnelSuccess(t *testing.T) {
 func TestCreateTunnelPublicURLNoPort(t *testing.T) {
 	st := &fakeStore{}
 	srv := New(Deps{Store: st, Limits: &fakeLimits{}, Lock: &fakeLocker{ok: true},
-		Cfg: config.Config{PublicScheme: "https", PublicHostSuffix: "indotunnel.my.id"}})
+		Cfg: config.Config{PublicScheme: "https", PublicHostSuffix: "indotunnel.ai.id"}})
 	rec := doAuthed(srv, "POST", "/v1/tunnels", `{"local_host":"127.0.0.1","local_port":3000,"protocol":"http"}`)
 	if rec.Code != 201 {
 		t.Fatalf("code=%d body=%s", rec.Code, rec.Body.String())
@@ -191,7 +191,7 @@ func TestCreateTunnelPublicURLNoPort(t *testing.T) {
 		PublicURL string `json:"public_url"`
 	}
 	_ = json.Unmarshal(rec.Body.Bytes(), &resp)
-	if resp.PublicURL != "https://"+resp.Subdomain+".indotunnel.my.id" {
+	if resp.PublicURL != "https://"+resp.Subdomain+".indotunnel.ai.id" {
 		t.Fatalf("public_url=%q, want no port", resp.PublicURL)
 	}
 }

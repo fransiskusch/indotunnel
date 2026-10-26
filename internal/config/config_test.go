@@ -69,8 +69,8 @@ func TestLoadPublicPortOverride(t *testing.T) {
 // TestPublicURL covers the port-inclusion rule: omitted when PUBLIC_PORT is
 // empty (production), appended when set (local dev edge on :8080).
 func TestPublicURL(t *testing.T) {
-	prod := Config{PublicScheme: "https", PublicHostSuffix: "indotunnel.my.id"}
-	if got := prod.PublicURL("yhhi9"); got != "https://yhhi9.indotunnel.my.id" {
+	prod := Config{PublicScheme: "https", PublicHostSuffix: "indotunnel.ai.id"}
+	if got := prod.PublicURL("yhhi9"); got != "https://yhhi9.indotunnel.ai.id" {
 		t.Fatalf("without port: got %q", got)
 	}
 
