@@ -5,6 +5,19 @@
 /bin/
 *.exe
 
+# node
+node_modules/
+
+# scratch probes (ssh helpers, debug dumps)
+npm/_*.bash
+npm/_*.txt
+npm/_*.b64
+npm/tun*.bash
+npm/tun*_out.b64
+npm/tun*_decoded.txt
+npm/ssh2file.cjs
+_recon.txt
+
 # release artifacts
 /dist/
 
